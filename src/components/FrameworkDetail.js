@@ -102,7 +102,9 @@ const FrameworkDetail = () => {
 
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">{framework.name}</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            {framework.name} <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(Hierarchy View)</span>
+                        </h1>
                         <p className="text-gray-500 mt-1">{framework.description}</p>
                     </div>
                     <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
