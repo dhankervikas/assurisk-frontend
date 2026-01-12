@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // Use environment variable for API URL, fallback to localhost for dev
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = 'https://assurisk-backend.onrender.com'; // Hardcoded for Production
 
 const Dashboard = () => {
     const navigate = useNavigate();
