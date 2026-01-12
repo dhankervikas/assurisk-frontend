@@ -1,115 +1,110 @@
-// src/contexts/AuthContext.js
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
-// Create the context
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
-// Custom hook to use the auth context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
-// Auth Provider Component
+// Use environment variable for API URL, fallback to localhost for dev
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is already logged in on mount
+  // Configure axios defaults
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (authAPI.isAuthenticated()) {
-          // Try to fetch current user from API
-          const currentUser = await authAPI.getCurrentUser();
-          setUser(currentUser);
-        } else {
-          // No token found
-          setUser(null);
+    const loadUser = async () => {
+      if (token) {
+        try {
+          console.log("[AuthContext] Loading user from token...");
+          // Verify token and get user details
+          const response = await axios.get(`${API_BASE_URL}/api/v1/auth/me`);
+          console.log("[AuthContext] User loaded:", response.data);
+          setUser(response.data);
+        } catch (err) {
+          console.error("[AuthContext] Failed to load user from existing token:", err);
+          logout();
         }
-      } catch (err) {
-        console.error('Auth check failed:', err);
-        // Token might be invalid
-        authAPI.logout();
-        setUser(null);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
-    checkAuth();
-  }, []);
+    loadUser();
+  }, [token]);
 
-  // Login function
   const login = async (username, password) => {
+    setError(null);
+    console.log("[AuthContext] Attempting login for:", username);
     try {
-      setError(null);
-      setLoading(true);
-      const response = await authAPI.login(username, password);
-      setUser(response.user);
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      console.log(`[AuthContext] Sending POST to ${API_BASE_URL}/api/v1/auth/login...`);
+      const response = await axios.post(`${API_BASE_URL}/api/v1/auth/login`, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      console.log("[AuthContext] Login response received:", response);
+      
+      const { access_token } = response.data;
+      if (!access_token) {
+          console.error("[AuthContext] ERROR: No access_token in response data!", response.data);
+          throw new Error("No access token received");
+      }
+      console.log("[AuthContext] Token extracted.");
+      
+      localStorage.setItem('token', access_token);
+      setToken(access_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      // Fetch user data immediately after login
+      console.log("[AuthContext] Fetching user profile (/me)...");
+      const userResponse = await axios.get(`${API_BASE_URL}/api/v1/auth/me`, {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      console.log("[AuthContext] User profile received:", userResponse.data);
+      setUser(userResponse.data);
+      
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Login failed. Please try again.';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
+      console.error("[AuthContext] Login process failed:", err);
+      const msg = err.response?.data?.detail || "Login failed";
+      console.error("[AuthContext] Error message:", msg);
+      setError(msg);
+      return { success: false, error: msg };
     }
   };
 
-  // Register function
-  const register = async (username, email, password) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const user = await authAPI.register(username, email, password);
-      // Auto-login after registration
-      await login(username, password);
-      return { success: true, user };
-    } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Registration failed. Please try again.';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Logout function
   const logout = () => {
-    authAPI.logout();
+    console.log("[AuthContext] Logging out...");
+    localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
-  };
-
-  // Refresh user data
-  const refreshUser = async () => {
-    try {
-      const currentUser = await authAPI.getCurrentUser();
-      setUser(currentUser);
-    } catch (err) {
-      console.error('Failed to refresh user:', err);
-    }
+    delete axios.defaults.headers.common['Authorization'];
   };
 
   const value = {
     user,
-    loading,
-    error,
+    token,
     login,
-    register,
     logout,
-    refreshUser,
-    isAuthenticated: !!user,
+    loading,
+    error
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

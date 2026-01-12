@@ -1,38 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import hook
-import axios from '../services/api';
-import {
-    Shield,
-    AlertTriangle,
-    CheckCircle,
-    Clock,
-    Activity,
-    ArrowRight,
-    RefreshCw,
-    Server
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { 
+    Activity, 
+    Shield, 
+    Server, 
+    RefreshCw 
 } from 'lucide-react';
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    Cell
-} from 'recharts';
+
+// Use environment variable for API URL, fallback to localhost for dev
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const Dashboard = () => {
-    // Navigate Hook
     const navigate = useNavigate();
-
     const [frameworks, setFrameworks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [integrationHealth, setIntegrationHealth] = useState({
-        okta: { status: 'healthy', lastSync: '1 min ago' },
-        aws: { status: 'healthy', lastSync: '5 mins ago' },
-        github: { status: 'syncing', lastSync: 'Just now' },
-        jira: { status: 'warning', lastSync: '2 hours ago' }
+        github: { status: 'healthy', lastSync: '10m ago' },
+        aws: { status: 'syncing', lastSync: '1h ago' },
+        jira: { status: 'warning', lastSync: '1d ago' }
     });
 
     useEffect(() => {
@@ -41,20 +27,30 @@ const Dashboard = () => {
 
     const fetchFrameworks = async () => {
         try {
-            const res = await axios.get('/frameworks/');
+            console.log("[Dashboard] Fetching frameworks...");
+            const res = await axios.get(`${API_BASE_URL}/api/v1/frameworks/`);
+            
+            if (!Array.isArray(res.data)) {
+                console.error("[Dashboard] Expected array but got:", typeof res.data, res.data);
+                setFrameworks([]); 
+                setLoading(false);
+                return;
+            }
+
             // Fetch stats for each to get progress
             const frameworksWithStats = await Promise.all(res.data.map(async (fw) => {
                 try {
-                    const statRes = await axios.get(`/frameworks/${fw.id}/stats`);
+                    const statRes = await axios.get(`${API_BASE_URL}/api/v1/frameworks/${fw.id}/stats`);
                     return statRes.data;
                 } catch (e) {
+                    console.warn(`[Dashboard] Failed to fetch stats for fw ${fw.id}`, e);
                     return { ...fw, completion_percentage: 0, total_controls: 0, implemented_controls: 0 };
                 }
             }));
             setFrameworks(frameworksWithStats);
             setLoading(false);
         } catch (err) {
-            console.error("Failed to load frameworks", err);
+            console.error("[Dashboard] Failed to load frameworks", err);
             setLoading(false);
         }
     };
@@ -67,7 +63,7 @@ const Dashboard = () => {
     if (loading) return <div className="p-8 text-center text-gray-500">Loading Dashboard...</div>;
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in p-6">
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-blue-900 to-slate-900 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -116,6 +112,11 @@ const Dashboard = () => {
             {/* Frameworks Grid */}
             <h2 className="text-xl font-bold text-gray-900">Active Frameworks</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {frameworks.length === 0 && (
+                    <div className="col-span-3 text-center text-gray-400 py-10">
+                        No frameworks found. Run the seeder?
+                    </div>
+                )}
                 {frameworks.map(fw => (
                     <div
                         key={fw.id}
