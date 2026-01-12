@@ -14,7 +14,6 @@ import {
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  // const { logout } = useAuth(); // Not using context anymore to be safe
 
   const handleLogout = () => {
     // NUCLEAR OPTION: Direct browser navigation
@@ -64,11 +63,11 @@ const Sidebar = () => {
       <div className="p-4 border-t border-gray-800 z-[9999] relative">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer border border-transparent hover:border-red-500"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer border-2 border-red-500"
           style={{ position: 'relative', zIndex: 10000 }}
         >
           <LogOut size={20} />
-          <span>Logout</span>
+          <span>LOGOUT (DEBUG)</span>
         </button>
       </div>
     </div>
