@@ -33,23 +33,6 @@ const ProtectedLayout = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-        <div style={{
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            width: '100vw', 
-            height: '50px', 
-            backgroundColor: 'red', 
-            color: 'white', 
-            zIndex: 999999, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            fontSize: '24px'
-        }}>
-            DEPLOYMENT CHECK: IF YOU SEE THIS, WE ARE CONNECTED
-        </div>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
