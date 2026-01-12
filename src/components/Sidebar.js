@@ -14,14 +14,15 @@ import {
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  // const { logout } = useAuth(); // Not using context anymore to be safe
 
   const handleLogout = () => {
-    // Force logout process
-    console.log("Logout clicked");
-    logout();
-    // Force hard navigation to clear any stuck state
-    window.location.href = '/login';
+    // NUCLEAR OPTION: Direct browser navigation
+    if (window.confirm("Confirm Logout?")) {
+        localStorage.removeItem('token');
+        localStorage.clear();
+        window.location.href = '/login';
+    }
   };
 
   const menuItems = [
@@ -35,7 +36,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 text-white h-screen flex flex-col fixed left-0 top-0 z-50">
+    <div className="w-64 bg-gray-900 text-white h-screen flex flex-col fixed left-0 top-0 z-[9999]">
       <div className="p-6 border-b border-gray-800">
         <h1 className="text-2xl font-bold">AssuRisk</h1>
         <p className="text-sm text-gray-400">Compliance Platform</p>
@@ -60,10 +61,11 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-800 z-[9999] relative">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer border border-transparent hover:border-red-500"
+          style={{ position: 'relative', zIndex: 10000 }}
         >
           <LogOut size={20} />
           <span>Logout</span>
