@@ -8,7 +8,8 @@ const FrameworkDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [framework, setFramework] = useState(null);
-    const [controls, setControls] = useState([]);
+    const [processes, setProcesses] = useState([]);
+    const [controls, setControls] = useState([]); // Keep raw controls for stats
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedControl, setSelectedControl] = useState(null);
@@ -16,21 +17,27 @@ const FrameworkDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Determine if ID is int or string (code)
-                // Backend expects ID (int). 
-                // If user somehow navigated with code, this might fail unless backend supports it.
-                // Assuming ID for now.
-
                 console.log(`Fetching framework ${id}...`);
 
-                const fwRes = await axios.get(`/frameworks/${id}`);
-                const ctrlRes = await axios.get(`/controls/?framework_id=${id}`);
+                // 1. Fetch Framework & Controls (Existing Logic)
+                const [fwRes, ctrlRes, procRes] = await Promise.all([
+                    axios.get(`/frameworks/${id}`),
+                    axios.get(`/controls/?framework_id=${id}`),
+                    axios.get('/processes/')
+                ]);
 
                 setFramework(fwRes.data);
                 setControls(ctrlRes.data);
+                
+                // 2. Filter Processes relevant to this Framework
+                // A process is relevant if it (or its subprocesses) contains a control 
+                // that belongs to this framework.
+                const relevantProcesses = filterProcessesForFramework(procRes.data, ctrlRes.data);
+                setProcesses(relevantProcesses);
+
                 setLoading(false);
             } catch (err) {
-                console.error("Framework fetch failed:", err);
+                console.error("Fetch failed:", err);
                 setError(err.message);
                 setLoading(false);
             }
@@ -38,6 +45,28 @@ const FrameworkDetail = () => {
 
         if (id) fetchData();
     }, [id]);
+
+    // Helper to filter and structure the hierarchy
+    const filterProcessesForFramework = (allProcesses, frameworkControls) => {
+        const fwControlIds = new Set(frameworkControls.map(c => c.id));
+        
+        return allProcesses.map(proc => {
+            // Filter subprocesses
+            const relevantSubs = proc.sub_processes.map(sub => {
+                // Filter controls within subprocess
+                const linkedControls = sub.controls.filter(c => fwControlIds.has(c.id));
+                
+                // Find full control details (the subprocess only has summary)
+                const detailedControls = linkedControls.map(summaryInfo => 
+                    frameworkControls.find(fc => fc.id === summaryInfo.id) || summaryInfo
+                );
+
+                return { ...sub, controls: detailedControls };
+            }).filter(sub => sub.controls.length > 0); // Only keep subs with controls
+
+            return { ...proc, sub_processes: relevantSubs };
+        }).filter(proc => proc.sub_processes.length > 0); // Only keep procs with subs
+    };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading framework...</div>;
 
@@ -57,14 +86,11 @@ const FrameworkDetail = () => {
     const stats = {
         total: controls.length,
         implemented: controls.filter(c => c.status === 'IMPLEMENTED').length,
-        inProgress: controls.filter(c => c.status === 'IN_PROGRESS').length,
-        notStarted: controls.filter(c => c.status === 'NOT_STARTED').length
     };
-
     const completion = stats.total > 0 ? Math.round((stats.implemented / stats.total) * 100) : 0;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20"> {/* pb-20 for scroll space */}
             {/* Header */}
             <div className="flex flex-col gap-4">
                 <button
@@ -86,54 +112,76 @@ const FrameworkDetail = () => {
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-gray-100 rounded-lg text-gray-600">
-                        <Shield className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-2xl font-bold">{stats.total}</div>
-                        <div className="text-xs text-gray-500 uppercase font-semibold">Total Controls</div>
-                    </div>
-                </div>
-                {/* ... other stats ... */}
-            </div>
-
-            {/* Controls List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">Controls</h2>
-                </div>
-                <div className="divide-y divide-gray-100">
-                    {controls.map(control => (
-                        <div
-                            key={control.id}
-                            onClick={() => setSelectedControl(control)}
-                            className="px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center justify-between"
-                        >
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3">
-                                    <span className="font-mono text-sm font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                        {control.control_id}
-                                    </span>
-                                    <h3 className="text-sm font-medium text-gray-900">{control.title}</h3>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${control.status === 'IMPLEMENTED' ? 'bg-green-50 text-green-700 border-green-200' :
-                                        control.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                            'bg-gray-50 text-gray-600 border-gray-200'
-                                    }`}>
-                                    {control.status.replace('_', ' ')}
+            {/* PROCESS HIERARCHY VIEW */}
+            <div className="space-y-8">
+                {processes.length === 0 ? (
+                     <div className="bg-yellow-50 p-6 rounded-lg text-yellow-700 border border-yellow-200">
+                        No processes mapped to this framework yet. Showing flat control list below is disabled in this view.
+                        <br/>(If you just seeded data, please refresh).
+                     </div>
+                ) : (
+                    processes.map(process => (
+                        <div key={process.id} className="space-y-4">
+                            {/* Process Header */}
+                            <div className="flex items-center gap-3 border-b border-gray-200 pb-2">
+                                <h2 className="text-xl font-bold text-gray-800">{process.name}</h2>
+                                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                    {process.sub_processes.length} activities
                                 </span>
                             </div>
+
+                            {/* SubProcesses Grid */}
+                            <div className="grid grid-cols-1 gap-6">
+                                {process.sub_processes.map(sub => (
+                                    <div key={sub.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 flex justify-between items-center">
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900">{sub.name}</h3>
+                                                {sub.description && <p className="text-xs text-gray-500">{sub.description}</p>}
+                                            </div>
+                                            <span className="text-xs font-medium text-gray-500">
+                                                {sub.controls.length} Controls
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="divide-y divide-gray-100">
+                                            {sub.controls.map(control => (
+                                                <div
+                                                    key={control.id}
+                                                    onClick={() => setSelectedControl(control)}
+                                                    className="px-6 py-3 hover:bg-blue-50 cursor-pointer transition-colors flex items-center justify-between group"
+                                                >
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="font-mono text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded group-hover:bg-white">
+                                                                {control.control_id}
+                                                            </span>
+                                                            <span className="text-sm text-gray-700 group-hover:text-blue-700">
+                                                                {control.title}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                            control.status === 'IMPLEMENTED' ? 'bg-green-100 text-green-800' :
+                                                            control.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                            {control.status?.replace('_', ' ')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    ))}
-                </div>
+                    ))
+                )}
             </div>
 
-            {/* Modal */}
+             {/* Modal */}
             {selectedControl && (
                 <ControlDetailModal
                     control={selectedControl}
