@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   LayoutDashboard, 
@@ -9,14 +9,15 @@ import {
   Users, 
   Settings,
   LogOut,
-  CheckCircle
+  CheckCircle,
+  User as UserIcon
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth(); // Get user from context
 
   const handleLogout = () => {
-    // Standard Logout with confirmation
+    // NUCLEAR OPTION: Direct browser navigation for reliable logout
     if (window.confirm("Are you sure you want to logout?")) {
         localStorage.removeItem('token');
         localStorage.clear();
@@ -33,6 +34,15 @@ const Sidebar = () => {
     { path: '/policies', icon: CheckCircle, label: 'Policies' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
+
+  // Helper to get initials
+  const getInitials = (name) => {
+      if (!name) return 'U';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const displayName = user?.full_name || user?.username || 'User';
+  const displayRole = user?.role || 'Member';
 
   return (
     <div className="w-64 bg-gray-900 text-white h-screen flex flex-col fixed left-0 top-0 z-[50]">
@@ -60,14 +70,27 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
+      {/* RE-ADDED PROFILE FOOTER */}
+      <div className="p-4 border-t border-gray-800 bg-gray-900">
+        <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-gray-800 transition-colors">
+            <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                    {getInitials(displayName)}
+                </div>
+                <div className="flex flex-col overflow-hidden">
+                    <span className="font-medium truncate text-sm">{displayName}</span>
+                    <span className="text-xs text-gray-400 capitalize">{displayRole}</span>
+                </div>
+            </div>
+            
+            <button
+                onClick={handleLogout}
+                className="text-gray-400 hover:text-red-400 transition-colors p-2 rounded hover:bg-gray-700 cursor-pointer"
+                title="Logout"
+            >
+                <LogOut size={20} />
+            </button>
+        </div>
       </div>
     </div>
   );
