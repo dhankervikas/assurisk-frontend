@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
+import FrameworkDetail from './components/FrameworkDetail';
 
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
@@ -42,6 +43,16 @@ function App() {
               <ProtectedRoute>
                 <ProtectedLayout>
                   <Dashboard />
+                </ProtectedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/frameworks/:id"
+            element={
+              <ProtectedRoute>
+                <ProtectedLayout>
+                  <FrameworkDetail />
                 </ProtectedLayout>
               </ProtectedRoute>
             }
