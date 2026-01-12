@@ -17,8 +17,11 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   const handleLogout = () => {
+    // Force logout process
+    console.log("Logout clicked");
     logout();
-    navigate('/login', { replace: true });
+    // Force hard navigation to clear any stuck state
+    window.location.href = '/login';
   };
 
   const menuItems = [
@@ -32,7 +35,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 text-white h-screen flex flex-col fixed">
+    <div className="w-64 bg-gray-900 text-white h-screen flex flex-col fixed left-0 top-0 z-50">
       <div className="p-6 border-b border-gray-800">
         <h1 className="text-2xl font-bold">AssuRisk</h1>
         <p className="text-sm text-gray-400">Compliance Platform</p>
@@ -60,7 +63,7 @@ const Sidebar = () => {
       <div className="p-4 border-t border-gray-800">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
         >
           <LogOut size={20} />
           <span>Logout</span>
