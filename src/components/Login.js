@@ -13,6 +13,9 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
+    // DEBUGGING: Show the API URL to the user
+    // const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+    // alert(`DEBUG: Connnecting to: ${apiUrl}`);
       if (user) {
           navigate('/dashboard', { replace: true });
       }
