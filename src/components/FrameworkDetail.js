@@ -7,6 +7,7 @@ import {
     Calendar, CheckCircle, FileText, AlertCircle,
     ChevronDown, Plus, Edit2, X, Upload, ExternalLink, Shield
 } from 'lucide-react';
+import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
 
@@ -310,6 +311,11 @@ const FrameworkDetail = () => {
 
     if (loading) return <div className="p-12 text-center text-gray-400">Loading Framework Data...</div>;
     if (error) return <div className="p-12 text-center text-red-500">{error}</div>;
+
+    // ROUTING TO SUB-COMPONENTS
+    if (framework?.code === "HIPAA") {
+        return <FrameworkDetail_HIPAA />; // DELEGATE TO HIPAA COMPONENT
+    }
 
     const isSOC2 = framework?.code?.includes("SOC2");
     const isISO = framework?.code?.includes("ISO27001");
