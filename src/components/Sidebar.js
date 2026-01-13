@@ -40,7 +40,7 @@ const Sidebar = () => {
             key: 'overview',
             label: 'OVERVIEW',
             items: [
-                { label: 'Home', path: '/dashboard', icon: Home },
+                { label: 'Dashboard', path: '/dashboard', icon: Home },
                 { label: 'Controls', path: '/controls', icon: Shield },
                 { label: 'Monitors', path: '/monitors', icon: Monitor },
                 { label: 'Get started', path: '/get-started', icon: CheckSquare, badge: '16 of 17' }
