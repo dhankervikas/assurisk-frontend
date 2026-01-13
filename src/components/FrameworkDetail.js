@@ -262,15 +262,56 @@ const FrameworkDetail = () => {
     const getRequirements = (control) => {
         if (!control) return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
 
-        // 1. Try Specific Title Match
+        // 1. Try Specific Title Match (Exact)
         if (control.title && SPECIFIC_EVIDENCE_MAP[control.title]) {
             return SPECIFIC_EVIDENCE_MAP[control.title];
         }
-        // 2. Try Category Match
+
+        // 2. Try Smart Keyword Match (Dynamic)
+        const titleLower = control.title.toLowerCase();
+        if (titleLower.includes("policy")) {
+            return [{ name: "Approved Policy Document", type: "Policy" }, { name: "Evidence of Annual Review", type: "Log" }];
+        }
+        if (titleLower.includes("training") || titleLower.includes("awareness")) {
+            return [{ name: "Training Slide Deck / Material", type: "Document" }, { name: "Attendance / Completion Log", type: "Log" }];
+        }
+        if (titleLower.includes("access") || titleLower.includes("password") || titleLower.includes("mfa")) {
+            return [{ name: "System Configuration Screenshot", type: "Config" }, { name: "User Access List Export", type: "List" }];
+        }
+        if (titleLower.includes("backup") || titleLower.includes("restore") || titleLower.includes("recovery")) {
+            return [{ name: "Backup Schedule Configuration", type: "Config" }, { name: "Recent Backup Report (Success)", type: "Report" }];
+        }
+        if (titleLower.includes("audit") || titleLower.includes("review") || titleLower.includes("assessment")) {
+            return [{ name: "Completed Assessment Report", type: "Report" }, { name: "Findings or Action Plan", type: "Plan" }];
+        }
+        if (titleLower.includes("incident") || titleLower.includes("breach")) {
+            return [{ name: "Incident Response Plan", type: "Plan" }, { name: "Post-Incident Review (if any)", type: "Report" }];
+        }
+        if (titleLower.includes("encryption") || titleLower.includes("key")) {
+            return [{ name: "Encryption Configuration", type: "Config" }, { name: "Key Management Standard", type: "Policy" }];
+        }
+        if (titleLower.includes("risk")) {
+            return [{ name: "Risk Register", type: "Sheet" }, { name: "Risk Treatment Plan", type: "Plan" }];
+        }
+        if (titleLower.includes("vendor") || titleLower.includes("supplier") || titleLower.includes("third party")) {
+            return [{ name: "Vendor List", type: "List" }, { name: "Due Diligence Report", type: "Report" }];
+        }
+
+        // 3. Try Category Match (Expanded)
         if (control.category && REQUIRED_EVIDENCE_DEFAULTS[control.category]) {
             return REQUIRED_EVIDENCE_DEFAULTS[control.category];
         }
-        // 3. Fallback
+
+        // 4. Fallback based on Code Prefix if Category is Missing/Mismatch
+        // e.g., if category is "CC6.1" but not in defaults
+        if (control.category) {
+            if (control.category.startsWith("A1")) return [{ name: "Capacity/Availability Report", type: "Report" }];
+            if (control.category.startsWith("C1")) return [{ name: "Confidentiality Policy", type: "Policy" }];
+            if (control.category.startsWith("P")) return [{ name: "Privacy Notice", type: "Policy" }];
+            if (control.category.startsWith("CC")) return [{ name: "Process Description", type: "Document" }, { name: "Evidence of Operation", type: "Evidence" }];
+        }
+
+        // 5. Ultimate Fallback
         return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
     };
 
