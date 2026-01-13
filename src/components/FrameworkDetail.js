@@ -107,6 +107,33 @@ const SPECIFIC_EVIDENCE_MAP = {
     "Segregation of Duties Matrix": [
         { name: "Segregation of Duties (SoD) Matrix", type: "Sheet" },
         { name: "Access Rights Review Log", type: "Log" }
+    ],
+    // --- NEW MAPPINGS FOR FULL EXPANSION ---
+    "Daily Database Backups": [
+        { name: "Backup Policy", type: "Policy" },
+        { name: "Sample Restore Test Report", type: "Evidence" },
+        { name: "Backup Automated Logs (30 days)", type: "Log" }
+    ],
+    "Business Continuity Plan": [
+        { name: "Business Continuity Plan (BCP)", type: "Document" },
+        { name: "Disaster Recovery Test Results", type: "Report" }
+    ],
+    "Production Change Logs": [
+        { name: "Change Management Policy", type: "Policy" },
+        { name: "List of Production Changes (Q1-Q4)", type: "Sheet" },
+        { name: "Sample Change Ticket with Approval", type: "Evidence" }
+    ],
+    "Patch Management Policy": [
+        { name: "Patch Management Policy", type: "Policy" },
+        { name: "Vulnerability Scan Report (Patched)", type: "Report" }
+    ],
+    "Privacy Policy Updated": [
+        { name: "Privacy Policy (Public URL)", type: "Link" },
+        { name: "Annual Privacy Policy Review", type: "Log" }
+    ],
+    "Subject Access Request (SAR) Log": [
+        { name: "SAR Process/Procedure", type: "Policy" },
+        { name: "Anonymized SAR Request Log", type: "Log" }
     ]
 };
 
