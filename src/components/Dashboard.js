@@ -39,7 +39,25 @@ const Dashboard = () => {
                 }
             }));
 
-            setFrameworks(frameworksWithStats);
+            // SORT LOGIC: ISO 27001 & SOC 2 First
+            const sortedFrameworks = frameworksWithStats.sort((a, b) => {
+                const priority = ["ISO", "SOC2"]; // Priority Codes (Partial Match)
+
+                const getPriority = (code) => {
+                    if (!code) return 99;
+                    if (code.includes("ISO27001")) return 1;
+                    if (code.includes("SOC2")) return 2;
+                    return 99;
+                };
+
+                const pA = getPriority(a.code);
+                const pB = getPriority(b.code);
+
+                if (pA !== pB) return pA - pB;
+                return a.name.localeCompare(b.name);
+            });
+
+            setFrameworks(sortedFrameworks);
             setLoading(false);
         } catch (err) {
             console.error("Failed to load dashboard data", err);
