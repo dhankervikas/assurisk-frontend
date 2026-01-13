@@ -54,6 +54,12 @@ const COSO_DESCRIPTIONS = {
     "P1.0": "Privacy: Notice and choice.",
     "P2.0": "Privacy: Collection, use, retention, and disposal.",
 
+    // ISO 27001 CLAUSES
+    "Organizational controls": "Clause 5: Organizational controls (37 controls)",
+    "People controls": "Clause 6: People controls (8 controls)",
+    "Physical controls": "Clause 7: Physical controls (14 controls)",
+    "Technological controls": "Clause 8: Technological controls (34 controls)",
+
     "DEFAULT": "Standard requirement for this criteria."
 };
 
@@ -193,11 +199,13 @@ const FrameworkDetail = () => {
             const fwRes = await axios.get(`${API_URL}/frameworks/${id}`, { headers });
             const fwData = fwRes.data;
             const isSOC2 = fwData.code && fwData.code.includes("SOC2");
+            const isISO = fwData.code && fwData.code.includes("ISO27001");
+            const useGroupedView = isSOC2 || isISO;
 
             const ctrlRes = await axios.get(`${API_URL}/controls/`, { headers });
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
-            if (isSOC2) {
+            if (useGroupedView) {
                 const grouped = {};
                 allControls.forEach(c => {
                     const key = c.category || "Uncategorized";
@@ -238,6 +246,8 @@ const FrameworkDetail = () => {
     if (error) return <div className="p-12 text-center text-red-500">{error}</div>;
 
     const isSOC2 = framework?.code?.includes("SOC2");
+    const isISO = framework?.code?.includes("ISO27001");
+    const useGroupedView = isSOC2 || isISO;
 
     const getFilteredControls = (controls) => {
         if (!searchTerm) return controls;
@@ -329,7 +339,7 @@ const FrameworkDetail = () => {
                     </div>
                     <div className="flex justify-between items-end">
                         <h1 className="text-3xl font-bold text-gray-900">
-                            {framework.name} {isSOC2 && <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(COSO View)</span>}
+                            {framework.name} {useGroupedView && <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(Premium View)</span>}
                         </h1>
                     </div>
                 </div>
@@ -352,8 +362,8 @@ const FrameworkDetail = () => {
 
                 {/* CONTENT AREA */}
                 <div className="space-y-10">
-                    {/* SOC 2 SPECIAL VIEW */}
-                    {isSOC2 ? (
+                    {/* GROUPED SPECIAL VIEW (SOC 2 & ISO) */}
+                    {useGroupedView ? (
                         Object.keys(socControls).sort().map(category => {
                             const controls = getFilteredControls(socControls[category]);
                             if (controls.length === 0) return null;
