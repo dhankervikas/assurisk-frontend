@@ -5,7 +5,7 @@ import axios from 'axios';
 import {
     ArrowLeft, Search, Filter, MoreHorizontal,
     Calendar, CheckCircle, FileText, AlertCircle,
-    ChevronDown, Plus, Edit2, X, Upload, ExternalLink
+    ChevronDown, Plus, Edit2, X, Upload, ExternalLink, Shield
 } from 'lucide-react';
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
@@ -16,11 +16,30 @@ const COSO_DESCRIPTIONS = {
     "CC1.2": "COSO Principle 2: The board of directors exercises oversight of the development and performance of internal control.",
     "CC1.3": "COSO Principle 3: Management establishes structures, reporting lines, and appropriate authorities and responsibilities.",
     "CC2.1": "COSO Principle 16: The entity selects, develops, and performs ongoing and/or separate evaluations.",
-    "CC3.1": "COSO Principle 17: The entity evaluates and communicates internal control deficiencies in a timely manner.",
     "CC6.1": "The entity limits physical access to the system to authorized people.",
-    "CC6.2": "The entity requires two-factor authentication for remote access.",
-    "CC6.3": "The entity manages access based on the principle of least privilege.",
     "DEFAULT": "Standard requirement for this criteria."
+};
+
+// REQUIRED EVIDENCE MAP (Mocked Knowledge Base)
+const REQUIRED_EVIDENCE = {
+    "CC1.1": [
+        { name: "Signed Code of Conduct", type: "Policy" },
+        { name: "Confidentiality Agreements (Employee)", type: "Contract" },
+        { name: "Background Check Records", type: "Log" }
+    ],
+    "CC1.2": [
+        { name: "Board Meeting Minutes (Q1-Q4)", type: "Report" },
+        { name: "Audit Committee Charter", type: "Policy" }
+    ],
+    "CC6.1": [
+        { name: "Physical Access Logs", type: "Log" },
+        { name: "Visitor Logbook", type: "Log" },
+        { name: "CCTV Retention Policy", type: "Policy" }
+    ],
+    "DEFAULT": [
+        { name: "Standard Policy Document", type: "Policy" },
+        { name: "Proof of Implementation", type: "Screenshot/Log" }
+    ]
 };
 
 const FrameworkDetail = () => {
@@ -102,11 +121,15 @@ const FrameworkDetail = () => {
 
     // MOCK EVIDENCE CALCULATOR (Random consistency for demo)
     const getEvidenceStats = (controlId) => {
-        // Hash ID to get consistent random
         const hash = controlId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        const total = (hash % 4) + 1; // 1 to 4 files needed
+        const total = (hash % 3) + 2; // 2 to 4 files needed
         const uploaded = hash % (total + 1); // 0 to total
         return { uploaded, total };
+    };
+
+    // Helper to determine if a specific mock requirement is met based on the random 'uploaded' count
+    const isRequirementMet = (index, uploadedCount) => {
+        return index < uploadedCount;
     };
 
     return (
@@ -218,10 +241,7 @@ const FrameworkDetail = () => {
             {/* CONTROL DRAWER */}
             {selectedControl && (
                 <div className="fixed inset-0 z-50 flex justify-end">
-                    {/* Backyard Backdrop */}
                     <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm" onClick={() => setSelectedControl(null)}></div>
-
-                    {/* Drawer Content */}
                     <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col transform transition-transform animate-slide-in-right overflow-y-auto">
                         <button
                             onClick={() => setSelectedControl(null)}
@@ -232,89 +252,87 @@ const FrameworkDetail = () => {
 
                         <div className="p-8 pb-4 border-b border-gray-100">
                             <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded mb-2 inline-block">
-                                {selectedControl.control_id}
+                                {selectedControl.category}
                             </span>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
                             <p className="text-gray-500 text-sm">
-                                {selectedControl.description}
+                                {COSO_DESCRIPTIONS[selectedControl.category] || selectedControl.description}
                             </p>
                         </div>
 
                         <div className="p-8 space-y-8 flex-1">
-                            {/* WHAT IS DONE */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                    <CheckCircle className="w-5 h-5 text-green-500" /> What has been taken care of
+
+                            {/* STANDARD REQUIREMENTS SECTION */}
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
+                                <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <Shield className="w-5 h-5" /> Standard Requirements ({selectedControl.category})
                                 </h3>
-                                <div className="bg-green-50 border border-green-100 rounded-xl p-4 space-y-2">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
-                                        <p className="text-sm text-gray-700">Control created and assigned to <span className="font-semibold">System Owner</span>.</p>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
-                                        <p className="text-sm text-gray-700">Policy definition linked to standard requirement {selectedControl.category}.</p>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
-                                        <p className="text-sm text-gray-700">Automation test configured (frequency: daily).</p>
-                                    </div>
+
+                                <div className="space-y-3">
+                                    {(() => {
+                                        const reqs = REQUIRED_EVIDENCE[selectedControl.category] || REQUIRED_EVIDENCE["DEFAULT"];
+                                        const stats = getEvidenceStats(selectedControl.control_id);
+
+                                        return reqs.map((req, idx) => {
+                                            const isMet = isRequirementMet(idx, stats.uploaded);
+                                            return (
+                                                <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isMet ? 'bg-green-500 text-white' : 'bg-gray-100 border border-gray-300'}`}>
+                                                            {isMet && <CheckCircle className="w-3.5 h-3.5" />}
+                                                        </div>
+                                                        <div>
+                                                            <p className={`text-sm font-medium ${isMet ? 'text-gray-900' : 'text-gray-500'}`}>{req.name}</p>
+                                                            <p className="text-xs text-blue-500">{req.type}</p>
+                                                        </div>
+                                                    </div>
+                                                    {isMet ?
+                                                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">EVIDENCE MET</span> :
+                                                        <button className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded hover:bg-orange-100">UPLOAD PENDING</button>
+                                                    }
+                                                </div>
+                                            );
+                                        });
+                                    })()}
                                 </div>
                             </div>
 
-                            {/* WHAT IS MISSING */}
+                            {/* MISSING EVIDENCE ACTIONS */}
                             <div>
                                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                    <AlertCircle className="w-5 h-5 text-orange-500" /> What is missing
+                                    <AlertCircle className="w-5 h-5 text-orange-500" /> Pending Actions
                                 </h3>
                                 <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
-                                    <div className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
-                                                <Upload className="w-4 h-4" />
+                                    {(() => {
+                                        const reqs = REQUIRED_EVIDENCE[selectedControl.category] || REQUIRED_EVIDENCE["DEFAULT"];
+                                        const stats = getEvidenceStats(selectedControl.control_id);
+                                        const missing = reqs.filter((_, idx) => !isRequirementMet(idx, stats.uploaded));
+
+                                        if (missing.length === 0) return <div className="p-4 text-sm text-gray-500 italic">No pending actions. All requirements met.</div>;
+
+                                        return missing.map((req, i) => (
+                                            <div key={i} className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                                                        <Upload className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">Upload {req.name}</p>
+                                                        <p className="text-xs text-gray-500">Required for {selectedControl.category} compliance.</p>
+                                                    </div>
+                                                </div>
+                                                <button className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">Upload</button>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900">Upload Evidence</p>
-                                                <p className="text-xs text-gray-500">Proof of execution required for Q3.</p>
-                                            </div>
-                                        </div>
-                                        <button className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">Upload</button>
-                                    </div>
-                                    <div className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
-                                                <ExternalLink className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900">Link External Evidence</p>
-                                                <p className="text-xs text-gray-500">Connect to Jira/GitHub/AWS.</p>
-                                            </div>
-                                        </div>
-                                        <button className="text-xs font-bold text-gray-600 border border-gray-200 px-3 py-1 rounded hover:bg-gray-100">Connect</button>
-                                    </div>
+                                        ));
+                                    })()}
                                 </div>
                             </div>
 
-                            {/* EVIDENCE LIST */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Current Evidence</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[1, 2].map(i => (
-                                        <div key={i} className="border border-gray-200 rounded-lg p-3 flex items-center gap-3">
-                                            <FileText className="w-8 h-8 text-blue-500" />
-                                            <div className="overflow-hidden">
-                                                <p className="text-sm font-medium text-gray-900 truncate">Policy_v{i}.pdf</p>
-                                                <p className="text-xs text-gray-500">Oct 24, 2024</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
                         <div className="p-6 border-t border-gray-200 bg-gray-50">
                             <button className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md">
-                                Mark as Complete
+                                Mark Control as Complete
                             </button>
                         </div>
                     </div>
