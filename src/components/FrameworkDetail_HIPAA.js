@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    ArrowLeft, Search, Filter, Shield, FileText, CheckCircle,
-    AlertTriangle, Lock, Eye, Download, Upload, Server, Activity
+    ArrowLeft, Search, Shield, Lock, Server
 } from 'lucide-react';
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
@@ -108,8 +107,8 @@ const FrameworkDetail_HIPAA = () => {
                                     key={mode}
                                     onClick={() => setSelectedSafeguard(mode)}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedSafeguard === mode
-                                            ? 'bg-gray-900 text-white shadow-md'
-                                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gray-900 text-white shadow-md'
+                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                                         }`}
                                 >
                                     {mode}
