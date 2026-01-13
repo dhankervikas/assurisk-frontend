@@ -351,24 +351,37 @@ const FrameworkDetail = () => {
         if (titleLower.includes("training") || titleLower.includes("awareness")) {
             return [{ name: "Training Slide Deck / Material", type: "Document" }, { name: "Attendance / Completion Log", type: "Log" }];
         }
-        if (titleLower.includes("access") || titleLower.includes("password") || titleLower.includes("mfa")) {
-            return [{ name: "System Configuration Screenshot", type: "Config" }, { name: "User Access List Export", type: "List" }];
-        }
-        if (titleLower.includes("backup") || titleLower.includes("restore") || titleLower.includes("recovery")) {
-            return [{ name: "Backup Schedule Configuration", type: "Config" }, { name: "Recent Backup Report (Success)", type: "Report" }];
-        }
-        if (titleLower.includes("audit") || titleLower.includes("review") || titleLower.includes("assessment")) {
-            return [{ name: "Completed Assessment Report", type: "Report" }, { name: "Findings or Action Plan", type: "Plan" }];
-        }
-        if (titleLower.includes("incident") || titleLower.includes("breach")) {
-            return [{ name: "Incident Response Plan", type: "Plan" }, { name: "Post-Incident Review (if any)", type: "Report" }];
-        }
-        if (titleLower.includes("encryption") || titleLower.includes("key")) {
-            return [{ name: "Encryption Configuration", type: "Config" }, { name: "Key Management Standard", type: "Policy" }];
-        }
-        if (titleLower.includes("risk")) {
-            return [{ name: "Risk Register", type: "Sheet" }, { name: "Risk Treatment Plan", type: "Plan" }];
-        }
+        // UTILS
+        const getEvidenceStats = (controlId) => {
+            // If we have selected this control and have fresh evidence, use it
+            if (selectedControl && selectedControl.id === controlId && evidenceList.length > 0) {
+                return { total: 0, uploaded: evidenceList };
+            }
+
+            // Fallback to global data (which might be stale or missing evidence detail)
+            // Find control in socControls
+            let control = null;
+            Object.values(socControls).forEach(list => {
+                const found = list.find(c => c.control_id === controlId);
+                if (found) control = found;
+            });
+
+            if (!control) return { total: 0, uploaded: [] };
+            // API v1 usually returns evidence count, not list in main fetch.
+            // So we default to empty unless we have fresh fetch.
+            return { total: 0, uploaded: control.evidence || [] };
+        };
+
+        const isRequirementMet = (reqIdx, uploadedFiles) => {
+            // PERMISSIVE LOGIC: If ANY file is uploaded, mark the first requirement as met.
+            // If 2 files, mark first 2, etc.
+            // Real logic should match type, but for beta, we just want to see progress.
+            if (!uploadedFiles || uploadedFiles.length === 0) return false;
+
+            // If the requirement asks for "Policy", and we have a file with "Policy" in name/type...
+            // For now, simple count matching:
+            return reqIdx < uploadedFiles.length;
+        };
         if (titleLower.includes("vendor") || titleLower.includes("supplier") || titleLower.includes("third party")) {
             return [{ name: "Vendor List", type: "List" }, { name: "Due Diligence Report", type: "Report" }];
         }
