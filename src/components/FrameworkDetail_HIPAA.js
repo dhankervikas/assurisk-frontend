@@ -39,13 +39,14 @@ const FrameworkDetail_HIPAA = () => {
 
             const [fwRes, ctrlRes] = await Promise.all([
                 axios.get(`${API_URL}/frameworks/${id}`, { headers }),
-                axios.get(`${API_URL}/controls/?limit=1000`, { headers })
+                // USE SERVER-SIDE FILTERING - ROBUST
+                axios.get(`${API_URL}/controls/?framework_id=${id}&limit=1000`, { headers })
             ]);
 
             setFramework(fwRes.data);
 
-            // FILTER & PARSE CONTROLS
-            const fwControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
+            // Controls are already filtered by the API
+            const fwControls = ctrlRes.data;
 
             // Enrich with HIPAA Metadata parsed from Title
             // Format: "164.308(a)(1)(i) ... (Required)"
@@ -59,6 +60,10 @@ const FrameworkDetail_HIPAA = () => {
 
                 return { ...c, implementationSpec, safeguard };
             });
+
+            console.log(`Debug: Loaded ${enriched.length} controls for Framework ${id}`);
+            setControls(enriched);
+            setLoading(false);
 
             setControls(enriched);
             setLoading(false);
@@ -166,6 +171,11 @@ const FrameworkDetail_HIPAA = () => {
                             <p className="text-gray-500 font-medium">No safeguards found matching your filters.</p>
                         </div>
                     )}
+
+                    {/* DEBUG FOOTER - TEMPORARY */}
+                    <div className="mt-8 p-4 bg-gray-100 rounded text-xs text-gray-400 font-mono">
+                        DEBUG: Framework ID: {id} | Total Controls Loaded: {controls.length} | Filtered View: {filteredControls.length}
+                    </div>
                 </div>
             </div>
         </div>
