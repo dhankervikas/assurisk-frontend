@@ -61,9 +61,24 @@ const Dashboard = () => {
             setLoading(false);
         } catch (err) {
             console.error("Failed to load dashboard data", err);
+            setError(err.message || "Failed to load data");
             setLoading(false);
         }
     };
+
+    if (error) {
+        return (
+            <div className="p-8 text-center text-red-500">
+                <p className="mb-4">Failed to load dashboard: {error}</p>
+                <button
+                    onClick={() => { setError(null); setLoading(true); fetchData(); }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                    Retry Connection
+                </button>
+            </div>
+        );
+    }
 
     // --- MOCKED "DUE SOON" DATA ---
     const actionItems = [
