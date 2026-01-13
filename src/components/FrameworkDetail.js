@@ -237,15 +237,16 @@ const FrameworkDetail = () => {
     if (loading) return <div className="p-12 text-center text-gray-400">Loading Framework Data...</div>;
     if (error) return <div className="p-12 text-center text-red-500">{error}</div>;
 
-    const isSOC2 = framework.code && framework.code.includes("SOC2");
+    const isSOC2 = framework?.code?.includes("SOC2");
 
     const getFilteredControls = (controls) => {
         if (!searchTerm) return controls;
-        return controls.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        return controls.filter(c => c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase()));
     };
 
     // MOCK EVIDENCE CALCULATOR (Random consistency for demo)
     const getEvidenceStats = (controlId) => {
+        if (!controlId || typeof controlId !== 'string') return { uploaded: 0, total: 3 };
         const hash = controlId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
         const total = (hash % 3) + 2; // 2 to 4 files needed
         const uploaded = hash % (total + 1); // 0 to total
@@ -259,12 +260,14 @@ const FrameworkDetail = () => {
 
     // NEW LOGIC: Get Specific Requirements
     const getRequirements = (control) => {
+        if (!control) return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
+
         // 1. Try Specific Title Match
-        if (SPECIFIC_EVIDENCE_MAP[control.title]) {
+        if (control.title && SPECIFIC_EVIDENCE_MAP[control.title]) {
             return SPECIFIC_EVIDENCE_MAP[control.title];
         }
         // 2. Try Category Match
-        if (REQUIRED_EVIDENCE_DEFAULTS[control.category]) {
+        if (control.category && REQUIRED_EVIDENCE_DEFAULTS[control.category]) {
             return REQUIRED_EVIDENCE_DEFAULTS[control.category];
         }
         // 3. Fallback
