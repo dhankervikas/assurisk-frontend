@@ -3,9 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    ArrowLeft, Search, Filter, MoreHorizontal,
-    Calendar, CheckCircle, FileText, AlertCircle,
-    ChevronDown, Plus, Edit2, X, Upload
+    ArrowLeft, Search, CheckCircle, X, Shield
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 
