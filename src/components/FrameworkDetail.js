@@ -85,13 +85,19 @@ const FrameworkDetail = () => {
 
         } catch (err) {
             console.error(err);
-            setError("Failed to load framework data.");
+            setError(`Failed to load data: ${err.message} \n(Status: ${err.response?.status})`);
             setLoading(false);
         }
     };
 
     if (loading) return <div className="p-12 text-center text-gray-400">Loading Premium View...</div>;
-    if (error) return <div className="p-12 text-center text-red-500">{error}</div>;
+    if (error) return (
+        <div className="p-12 text-center text-red-500">
+            <h2 className="text-xl font-bold mb-2">Error Loading Framework</h2>
+            <p className="font-mono bg-red-50 p-2 rounded border border-red-200 inline-block">{error}</p>
+            <p className="text-sm mt-2 text-gray-400">API: {API_URL}</p>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
