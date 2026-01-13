@@ -70,23 +70,46 @@ const SPECIFIC_EVIDENCE_MAP = {
         { name: "Contractor Acknowledgement Log", type: "Log" },
         { name: "Sample Signed Contractor Agreements", type: "Contract" }
     ],
+    // --- NEW: EXPLICITLY REQUESTED ---
     "Confidentiality Agreement acknowledged by contractors": [
-        { name: "NDA Template", type: "Policy" },
-        { name: "Contractor NDA Registry", type: "Log" }
+        { name: "NDA Template (Contractor)", type: "Policy" },
+        { name: "Contractor NDA Registry", type: "Log" },
+        { name: "Sample Signed NDAs (Contractors)", type: "Evidence" }
     ],
-    "Confidentiality Agreement acknowledged by employees": [
-        { name: "Employee Handbook / NDA Section", type: "Policy" },
-        { name: "Signed Employee NDAs (Sample)", type: "Evidence" }
+    "Supplier Code of Conduct Review": [
+        { name: "Supplier Code of Conduct", type: "Policy" },
+        { name: "Vendor Acknowledgement Log", type: "Log" }
     ],
-    "Conflict of Interest Policy review": [
-        { name: "Conflict of Interest Policy", type: "Policy" },
-        { name: "Annual COI Disclosure Log", type: "Log" }
-    ],
-    "Board meeting minutes review": [
+    "Board meeting minutes review (Quarterly)": [
         { name: "Board Meeting Minutes (Q1)", type: "Minutes" },
         { name: "Board Meeting Minutes (Q2)", type: "Minutes" },
         { name: "Board Meeting Minutes (Q3)", type: "Minutes" },
         { name: "Board Meeting Minutes (Q4)", type: "Minutes" }
+    ],
+    "independent Director Review of Internal Findings": [
+        { name: "Board Independence Statement", type: "Policy" },
+        { name: "Internal Audit Review Minutes", type: "Report" }
+    ],
+    "Whistleblower Policy (Review & Communication)": [
+        { name: "Whistleblower Policy", type: "Policy" },
+        { name: "Evidence of Communication (Email/Intranet)", type: "Evidence" }
+    ],
+    "Whistleblower Hotline Availability Test": [
+        { name: "Hotline Test Log", type: "Log" },
+        { name: "Anonymous Reporting Mechanism Screenshot", type: "Evidence" }
+    ],
+    "Performance Reviews (Biannual)": [
+        { name: "Performance Review Schedule", type: "Policy" },
+        { name: "Sample Completed Review Forms (Anonymized)", type: "HR Doc" }
+    ],
+    "Security Awareness Training (Onboarding)": [
+        { name: "Security Training Slides/Material", type: "Document" },
+        { name: "New Hire Training Completion Log", type: "Log" }
+    ],
+    "Quarterly User Access Review": [
+        { name: "User Access Review Policy", type: "Policy" },
+        { name: "Completed Access Review (Q1-Q4)", type: "Review" },
+        { name: "Evidence of Revocation (if applicable)", type: "Ticket" }
     ],
     "Quarterly security compliance report to Board": [
         { name: "Security Presentation Deck (Q1)", type: "Report" },
