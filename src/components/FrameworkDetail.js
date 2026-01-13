@@ -382,7 +382,27 @@ const FrameworkDetail = () => {
                 <div className="space-y-10">
                     {/* GROUPED SPECIAL VIEW (SOC 2 & ISO) */}
                     {useGroupedView ? (
-                        Object.keys(socControls).sort().map(category => {
+                        Object.keys(socControls).sort((a, b) => {
+                            // ISO 27001 Custom Sort Order
+                            const ISO_ORDER = [
+                                "Governance & Policy",
+                                "Risk Management",
+                                "Performance Evaluation",
+                                "Improvement",
+                                "Operations (General)",
+                                "Supplier Mgmt",
+                                "Incident & Resilience",
+                                "Legal & Compliance"
+                            ];
+
+                            const idxA = ISO_ORDER.indexOf(a);
+                            const idxB = ISO_ORDER.indexOf(b);
+
+                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                            if (idxA !== -1) return -1;
+                            if (idxB !== -1) return 1;
+                            return a.localeCompare(b);
+                        }).map(category => {
                             const controls = getFilteredControls(socControls[category]);
                             if (controls.length === 0) return null;
                             const cosoText = COSO_DESCRIPTIONS[category] || COSO_DESCRIPTIONS["DEFAULT"];
@@ -429,7 +449,7 @@ const FrameworkDetail = () => {
                                                                     </span>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono">{category}</td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono">{c.control_id}</td>
                                                             <td className="px-6 py-4 text-sm text-gray-500">System</td>
                                                         </tr>
                                                     );
