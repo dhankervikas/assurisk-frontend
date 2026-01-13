@@ -107,7 +107,9 @@ const FrameworkDetail = () => {
                     </div>
 
                     <div className="flex justify-between items-end">
-                        <h1 className="text-3xl font-bold text-gray-900">{framework.name}</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            {framework.name} <span className="text-sm font-normal text-purple-600 bg-purple-50 px-2 py-1 rounded-full align-middle">(Drata Style v1.0)</span>
+                        </h1>
                         <div className="flex gap-3">
                             <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                                 <Edit2 className="w-4 h-4" /> Edit system description
@@ -293,7 +295,7 @@ const FrameworkDetail = () => {
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-2">
                                                                 <div className={`w-2 h-2 rounded-full ${control.status === 'IMPLEMENTED' ? 'bg-green-500' :
-                                                                        control.status === 'IN_PROGRESS' ? 'bg-blue-500' : 'bg-gray-300'
+                                                                    control.status === 'IN_PROGRESS' ? 'bg-blue-500' : 'bg-gray-300'
                                                                     }`}></div>
                                                                 <span className="text-sm text-gray-600">
                                                                     {control.status === 'IMPLEMENTED' ? '3/3' : '0/3'}
