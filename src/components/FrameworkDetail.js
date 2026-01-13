@@ -354,7 +354,11 @@ const FrameworkDetail = () => {
         // UTILS
         const getEvidenceStats = (controlId) => {
             // If we have selected this control and have fresh evidence, use it
-            if (selectedControl && selectedControl.id === controlId && evidenceList.length > 0) {
+            // FIX: Compare control_id (string) vs controlId (string) OR ensure we match the context
+            if (selectedControl && selectedControl.control_id === controlId && evidenceList) {
+                // Even if length is 0, if we fetched it, we should use it (it might really be 0).
+                // But usually we care if we have something to show 'MET'.
+                // If evidenceList is empty but freshly fetched, it means 0 files.
                 return { total: 0, uploaded: evidenceList };
             }
 
