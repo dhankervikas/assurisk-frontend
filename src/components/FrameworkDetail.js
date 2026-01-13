@@ -8,7 +8,7 @@ import {
     ChevronDown, Plus, Edit2
 } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://assurisk-backend.onrender.com/api/v1';
+const API_URL = 'https://assurisk-backend.onrender.com/api/v1'; // HARDCODED FOR PRODUCTION DEBUGGING
 
 const FrameworkDetail = () => {
     const { id } = useParams();
@@ -95,7 +95,10 @@ const FrameworkDetail = () => {
         <div className="p-12 text-center text-red-500">
             <h2 className="text-xl font-bold mb-2">Error Loading Framework</h2>
             <p className="font-mono bg-red-50 p-2 rounded border border-red-200 inline-block">{error}</p>
-            <p className="text-sm mt-2 text-gray-400">API: {API_URL}</p>
+            <p className="text-sm mt-2 text-gray-400 font-mono">
+                Target: {API_URL}/frameworks/{id} <br />
+                (Hardcoded P2)
+            </p>
         </div>
     );
 
