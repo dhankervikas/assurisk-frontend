@@ -269,7 +269,7 @@ const FrameworkDetail = () => {
             const isISO = fwData.code && fwData.code.includes("ISO27001");
             const useGroupedView = isSOC2 || isISO;
 
-            const ctrlRes = await axios.get(`${API_URL}/controls/`, { headers });
+            const ctrlRes = await axios.get(`${API_URL}/controls/?limit=1000`, { headers });
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
             if (useGroupedView) {
