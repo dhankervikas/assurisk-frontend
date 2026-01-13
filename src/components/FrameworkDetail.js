@@ -12,11 +12,48 @@ const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
 
 // COSO DESCRIPTIONS MAP
 const COSO_DESCRIPTIONS = {
+    // CC1: Control Environment (COSO 1-5)
     "CC1.1": "COSO Principle 1: The entity demonstrates a commitment to integrity and ethical values.",
     "CC1.2": "COSO Principle 2: The board of directors exercises oversight of the development and performance of internal control.",
-    "CC1.3": "COSO Principle 3: Management establishes structures, reporting lines, and appropriate authorities and responsibilities.",
-    "CC2.1": "COSO Principle 16: The entity selects, develops, and performs ongoing and/or separate evaluations.",
-    "CC6.1": "The entity limits physical access to the system to authorized people.",
+    "CC1.3": "COSO Principle 3: Management establishes structures, reporting lines, and appropriate authorities.",
+    "CC1.4": "COSO Principle 4: The entity demonstrates a commitment to attract, develop, and retain competent individuals.",
+    "CC1.5": "COSO Principle 5: The entity holds individuals accountable for their internal control responsibilities.",
+
+    // CC2: Communication & Information (COSO 13-15)
+    "CC2.1": "COSO Principle 13: The entity obtains or generates and uses relevant, quality information.",
+    "CC2.2": "COSO Principle 14: The entity internally communicates information.",
+    "CC2.3": "COSO Principle 15: The entity communicates with external parties.",
+
+    // CC3: Risk Assessment (COSO 6-9)
+    "CC3.1": "COSO Principle 6: The entity specifies objectives with sufficient clarity.",
+    "CC3.2": "COSO Principle 7: The entity identifies risks to the achievement of its objectives.",
+    "CC3.3": "COSO Principle 8: The entity considers the potential for fraud in assessing risks.",
+    "CC3.4": "COSO Principle 9: The entity identifies and assesses changes that could significantly impact the system.",
+
+    // CC4: Monitoring Activities (COSO 16-17)
+    "CC4.1": "COSO Principle 16: The entity selects, develops, and performs ongoing and/or separate evaluations.",
+    "CC4.2": "COSO Principle 17: The entity evaluates and communicates internal control deficiencies.",
+
+    // CC5: Control Activities (COSO 10-12)
+    "CC5.1": "COSO Principle 10: The entity selects and develops control activities.",
+    "CC5.2": "COSO Principle 11: The entity selects and develops general control activities over technology.",
+    "CC5.3": "COSO Principle 12: The entity deploys control activities through policies and procedures.",
+
+    // CC6-9: SOC 2 Specifics
+    "CC6.1": "Logical Access: The entity implements logical access security software, infrastructure, and architectures.",
+    "CC6.2": "Logical Access: Prior to issuing credentials, the entity identifies and authenticates users.",
+    "CC6.3": "Logical Access: The entity authorizes access to protected information assets.",
+    "CC6.6": "Logical Access: The entity restricts physical access.",
+    "CC7.1": "System Operations: The entity identifies and manages system vulnerabilities.",
+    "CC8.1": "Change Management: The entity authorizes, designs, develops, tests, and implements changes.",
+
+    // Additional Criteria
+    "A1.1": "Availability: The entity maintains, monitors, and evaluates current processing capacity.",
+    "A1.2": "Availability: Data backup and recovery.",
+    "C1.1": "Confidentiality: The entity identifies and maintains confidential information.",
+    "P1.0": "Privacy: Notice and choice.",
+    "P2.0": "Privacy: Collection, use, retention, and disposal.",
+
     "DEFAULT": "Standard requirement for this criteria."
 };
 
