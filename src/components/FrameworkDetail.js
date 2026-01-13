@@ -449,7 +449,9 @@ const FrameworkDetail = () => {
                                                                     </span>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono">{c.control_id}</td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono">
+                                                                {isSOC2 ? c.category : c.control_id}
+                                                            </td>
                                                             <td className="px-6 py-4 text-sm text-gray-500">System</td>
                                                         </tr>
                                                     );
