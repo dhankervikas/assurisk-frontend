@@ -204,10 +204,30 @@ const FrameworkDetail = () => {
 
     // DRAWER STATE
     const [selectedControl, setSelectedControl] = useState(null);
+    const [evidenceList, setEvidenceList] = useState([]); // NEW: Store evidence list
 
     useEffect(() => {
         fetchData();
     }, [id]);
+
+    // FETCH EVIDENCE WHEN CONTROL IS SELECTED
+    useEffect(() => {
+        if (selectedControl) {
+            fetchEvidence(selectedControl.id);
+        } else {
+            setEvidenceList([]);
+        }
+    }, [selectedControl]);
+
+    const fetchEvidence = async (controlId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${API_URL}/evidence/control/${controlId}`, { headers: { Authorization: `Bearer ${token}` } });
+            setEvidenceList(res.data);
+        } catch (e) {
+            console.error("Failed to load evidence", e);
+        }
+    };
 
     const handleFileUpload = async (e, controlId) => {
         const file = e.target.files[0];
@@ -228,8 +248,9 @@ const FrameworkDetail = () => {
                 }
             });
             alert("File uploaded successfully!");
-            // Refresh data to show updated stats
+            // Refresh main data AND specific control evidence
             fetchData();
+            fetchEvidence(controlId);
         } catch (error) {
             console.error("Upload failed", error);
             alert("Upload failed. Please try again.");
