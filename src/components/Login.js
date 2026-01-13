@@ -44,7 +44,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">AssuRisk</h1>
-          <p className="text-gray-600 mt-2">Compliance Platform</p>
+          <p className="text-gray-600 mt-2">Compliance Platform v2.1</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
