@@ -25,6 +25,7 @@ const FrameworkDetail_HIPAA = () => {
     const [framework, setFramework] = useState(null);
     const [controls, setControls] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null); // Add Error State
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedSafeguard, setSelectedSafeguard] = useState("All");
 
@@ -67,22 +68,25 @@ const FrameworkDetail_HIPAA = () => {
 
             setControls(enriched);
             setLoading(false);
-        } catch (error) {
-            console.error("Error fetching HIPAA data:", error);
+            setControls(enriched);
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching HIPAA data:", err);
+            setError(err.message || "Failed to load data"); // Capture error
             setLoading(false);
         }
     };
 
     const handleBack = () => navigate('/dashboard');
 
-    // FILTERING
-    const filteredControls = controls.filter(c => {
-        const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesGroup = selectedSafeguard === "All" || c.safeguard === selectedSafeguard;
-        return matchesSearch && matchesGroup;
-    });
-
     if (loading) return <div className="p-10 text-center text-gray-400">Loading HIPAA Protocols...</div>;
+    if (error) return (
+        <div className="p-8 m-8 bg-red-50 border border-red-200 rounded-xl text-center">
+            <h3 className="text-red-800 font-bold text-lg mb-2">Error Loading Framework</h3>
+            <p className="text-red-600 font-mono">{error}</p>
+            <p className="text-xs text-gray-400 mt-4">ID: {id}</p>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 font-sans">
