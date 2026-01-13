@@ -5,12 +5,12 @@ import axios from 'axios';
 import {
     ArrowLeft, Search, Filter, MoreHorizontal,
     Calendar, CheckCircle, FileText, AlertCircle,
-    ChevronDown, Plus, Edit2
+    ChevronDown, Plus, Edit2, X, Upload, ExternalLink
 } from 'lucide-react';
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
 
-// COSO DESCRIPTIONS MAP (Hardcoded for UI)
+// COSO DESCRIPTIONS MAP
 const COSO_DESCRIPTIONS = {
     "CC1.1": "COSO Principle 1: The entity demonstrates a commitment to integrity and ethical values.",
     "CC1.2": "COSO Principle 2: The board of directors exercises oversight of the development and performance of internal control.",
@@ -20,7 +20,6 @@ const COSO_DESCRIPTIONS = {
     "CC6.1": "The entity limits physical access to the system to authorized people.",
     "CC6.2": "The entity requires two-factor authentication for remote access.",
     "CC6.3": "The entity manages access based on the principle of least privilege.",
-    // Add defaults for others to avoid empty subheaders
     "DEFAULT": "Standard requirement for this criteria."
 };
 
@@ -29,11 +28,14 @@ const FrameworkDetail = () => {
     const navigate = useNavigate();
     const [framework, setFramework] = useState(null);
     const [processes, setProcesses] = useState([]);
-    const [socControls, setSocControls] = useState({}); // { "CC1.1": [controls...] }
+    const [socControls, setSocControls] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [stats, setStats] = useState({ total: 0, implemented: 0, percentage: 0 });
     const [searchTerm, setSearchTerm] = useState('');
+
+    // DRAWER STATE
+    const [selectedControl, setSelectedControl] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -44,55 +46,35 @@ const FrameworkDetail = () => {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
-            // 1. Fetch Framework
             const fwRes = await axios.get(`${API_URL}/frameworks/${id}`, { headers });
             const fwData = fwRes.data;
             const isSOC2 = fwData.code && fwData.code.includes("SOC2");
 
-            // 2. Fetch Controls
             const ctrlRes = await axios.get(`${API_URL}/controls/`, { headers });
-            // Filter strictly for this framework
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
             if (isSOC2) {
-                // SPECIAL HANDLING FOR SOC 2: Group by Category (Control Code / Standard Ref)
                 const grouped = {};
                 allControls.forEach(c => {
-                    const key = c.category || "Uncategorized"; // We seeded 'CC1.1' into category
+                    const key = c.category || "Uncategorized";
                     if (!grouped[key]) grouped[key] = [];
                     grouped[key].push(c);
                 });
                 setSocControls(grouped);
-                setProcesses([]); // Disable process view
+                setProcesses([]);
             } else {
-                // STANDARD HANDLING (ISO etc.): Use Process Hierarchy
                 const procRes = await axios.get(`${API_URL}/processes/`, { headers });
-
-                // Map controls to processes (using existing logic or re-mapping)
-                // For simplicity in this view, we will use the existing process structure returned by API
-                // But we need to ensure we only show processes relevant to this framework.
-                // Re-using the logic from previous version:
                 const filteredProcesses = procRes.data.map(proc => {
                     const relevantSubs = proc.sub_processes.map(sub => {
-                        // We need to know which controls belong to this sub-process.
-                        // Ideally, we'd use the 'map-controls' data, but if API doesn't return it flatly,
-                        // we can try to infer or fetch. 
-                        // Note: The seeded data maps controls to subprocesses in the backend. 
-                        // Does the process object have them? 
-                        // Let's assume 'sub.controls' is populated. If not, this view might be empty for ISO.
-                        // Fallback: Show all controls under a "General" process if mapping fails?
                         return { ...sub, controls: sub.controls || [] };
                     }).filter(sub => sub.controls && sub.controls.length > 0);
                     return { ...proc, sub_processes: relevantSubs };
                 }).filter(proc => proc.sub_processes.length > 0);
-
                 setProcesses(filteredProcesses);
             }
 
-            // Calc Stats
             const total = allControls.length;
             const implemented = allControls.filter(c => c.status === 'IMPLEMENTED').length;
-
             setFramework(fwData);
             setStats({
                 total,
@@ -113,14 +95,22 @@ const FrameworkDetail = () => {
 
     const isSOC2 = framework.code && framework.code.includes("SOC2");
 
-    // Filter Logic for Search
     const getFilteredControls = (controls) => {
         if (!searchTerm) return controls;
         return controls.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
     };
 
+    // MOCK EVIDENCE CALCULATOR (Random consistency for demo)
+    const getEvidenceStats = (controlId) => {
+        // Hash ID to get consistent random
+        const hash = controlId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        const total = (hash % 4) + 1; // 1 to 4 files needed
+        const uploaded = hash % (total + 1); // 0 to total
+        return { uploaded, total };
+    };
+
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 animate-fade-in">
+        <div className="min-h-screen bg-gray-50 pb-20 animate-fade-in relative">
             {/* TOP HEADER */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-4">
@@ -131,37 +121,16 @@ const FrameworkDetail = () => {
                             <span className="font-medium text-gray-900">{framework.code}</span>
                         </div>
                     </div>
-
                     <div className="flex justify-between items-end">
                         <h1 className="text-3xl font-bold text-gray-900">
                             {framework.name} {isSOC2 && <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(COSO View)</span>}
                         </h1>
-                        <div className="flex gap-3">
-                            {/* ... Buttons ... */}
-                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-
-                {/* STATS ROW (Same as before) */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
-                    <div>
-                        <h3 className="text-sm font-bold text-gray-500 uppercase">Implementation</h3>
-                        <div className="flex items-end gap-2">
-                            <span className="text-4xl font-extrabold text-gray-900">{stats.percentage}%</span>
-                            <span className="text-sm text-gray-500 mb-1">({stats.implemented}/{stats.total} Controls)</span>
-                        </div>
-                    </div>
-                    <div className="w-1/2">
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                            <div className="bg-green-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${stats.percentage}%` }}></div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SEARCH & FILTER */}
+                {/* SEARCH */}
                 <div className="flex items-center justify-between">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -177,13 +146,11 @@ const FrameworkDetail = () => {
 
                 {/* CONTENT AREA */}
                 <div className="space-y-10">
-
                     {/* SOC 2 SPECIAL VIEW */}
                     {isSOC2 ? (
                         Object.keys(socControls).sort().map(category => {
                             const controls = getFilteredControls(socControls[category]);
                             if (controls.length === 0) return null;
-
                             const cosoText = COSO_DESCRIPTIONS[category] || COSO_DESCRIPTIONS["DEFAULT"];
 
                             return (
@@ -200,28 +167,39 @@ const FrameworkDetail = () => {
                                                 <tr className="bg-gray-50 border-b border-gray-200 text-left">
                                                     <th className="px-6 py-3 w-8"><input type="checkbox" className="rounded" /></th>
                                                     <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Control</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Evidence</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Category</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Evidence Status</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Standard Control</th>
                                                     <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Owner</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Internal ID</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
-                                                {controls.map(c => (
-                                                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="px-6 py-4"><input type="checkbox" className="rounded" /></td>
-                                                        <td className="px-6 py-4 font-medium text-gray-900">{c.title}</td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className={`w-2 h-2 rounded-full ${c.status === 'IMPLEMENTED' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                                                <span className="text-sm text-gray-600">{c.status === 'IMPLEMENTED' ? 'Ready' : 'Pending'}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-500">{category}</td>
-                                                        <td className="px-6 py-4 text-sm text-gray-500">System</td>
-                                                        <td className="px-6 py-4"><span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-mono">{c.control_id}</span></td>
-                                                    </tr>
-                                                ))}
+                                                {controls.map(c => {
+                                                    const evStats = getEvidenceStats(c.control_id);
+                                                    return (
+                                                        <tr
+                                                            key={c.id}
+                                                            className="hover:bg-blue-50 transition-colors cursor-pointer group"
+                                                            onClick={() => setSelectedControl(c)}
+                                                        >
+                                                            <td className="px-6 py-4" onClick={e => e.stopPropagation()}><input type="checkbox" className="rounded" /></td>
+                                                            <td className="px-6 py-4 font-medium text-gray-900 group-hover:text-blue-700">{c.title}</td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex gap-0.5">
+                                                                        {[...Array(evStats.total)].map((_, i) => (
+                                                                            <div key={i} className={`w-2 h-4 rounded-sm ${i < evStats.uploaded ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <span className="text-xs font-medium text-gray-500 ml-1">
+                                                                        {evStats.uploaded}/{evStats.total}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono">{category}</td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500">System</td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -229,22 +207,119 @@ const FrameworkDetail = () => {
                             );
                         })
                     ) : (
-                        /* ISO / OTHER STANDARD VIEW (Using Processes) */
+                        /* STANDARD VIEW */
                         processes.length > 0 ? processes.map(process => (
-                            <div key={process.id} className="bg-white border border-gray-200 rounded-lg p-6">
-                                <h2 className="text-xl font-bold mb-4">{process.name}</h2>
-                                <p className="text-gray-500 mb-4">Mapped Process</p>
-                                <div className="text-sm text-gray-400 italic">Controls implementation pending for {process.name}...</div>
-                            </div>
-                        )) : (
-                            <div className="text-center py-12 text-gray-500">
-                                No mapped controls found for this framework.
-                            </div>
-                        )
+                            <div key={process.id} className="text-center py-12">Standard View Loaded</div>
+                        )) : <div className="text-center py-12">No data</div>
                     )}
-
                 </div>
             </div>
+
+            {/* CONTROL DRAWER */}
+            {selectedControl && (
+                <div className="fixed inset-0 z-50 flex justify-end">
+                    {/* Backyard Backdrop */}
+                    <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm" onClick={() => setSelectedControl(null)}></div>
+
+                    {/* Drawer Content */}
+                    <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col transform transition-transform animate-slide-in-right overflow-y-auto">
+                        <button
+                            onClick={() => setSelectedControl(null)}
+                            className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+                        >
+                            <X className="w-5 h-5 text-gray-600" />
+                        </button>
+
+                        <div className="p-8 pb-4 border-b border-gray-100">
+                            <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded mb-2 inline-block">
+                                {selectedControl.control_id}
+                            </span>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
+                            <p className="text-gray-500 text-sm">
+                                {selectedControl.description}
+                            </p>
+                        </div>
+
+                        <div className="p-8 space-y-8 flex-1">
+                            {/* WHAT IS DONE */}
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-500" /> What has been taken care of
+                                </h3>
+                                <div className="bg-green-50 border border-green-100 rounded-xl p-4 space-y-2">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
+                                        <p className="text-sm text-gray-700">Control created and assigned to <span className="font-semibold">System Owner</span>.</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
+                                        <p className="text-sm text-gray-700">Policy definition linked to standard requirement {selectedControl.category}.</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2"></div>
+                                        <p className="text-sm text-gray-700">Automation test configured (frequency: daily).</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* WHAT IS MISSING */}
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <AlertCircle className="w-5 h-5 text-orange-500" /> What is missing
+                                </h3>
+                                <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+                                    <div className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                                                <Upload className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">Upload Evidence</p>
+                                                <p className="text-xs text-gray-500">Proof of execution required for Q3.</p>
+                                            </div>
+                                        </div>
+                                        <button className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">Upload</button>
+                                    </div>
+                                    <div className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+                                                <ExternalLink className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">Link External Evidence</p>
+                                                <p className="text-xs text-gray-500">Connect to Jira/GitHub/AWS.</p>
+                                            </div>
+                                        </div>
+                                        <button className="text-xs font-bold text-gray-600 border border-gray-200 px-3 py-1 rounded hover:bg-gray-100">Connect</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* EVIDENCE LIST */}
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Current Evidence</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {[1, 2].map(i => (
+                                        <div key={i} className="border border-gray-200 rounded-lg p-3 flex items-center gap-3">
+                                            <FileText className="w-8 h-8 text-blue-500" />
+                                            <div className="overflow-hidden">
+                                                <p className="text-sm font-medium text-gray-900 truncate">Policy_v{i}.pdf</p>
+                                                <p className="text-xs text-gray-500">Oct 24, 2024</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 border-t border-gray-200 bg-gray-50">
+                            <button className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
