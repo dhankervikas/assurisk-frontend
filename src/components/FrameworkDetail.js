@@ -5,7 +5,7 @@ import axios from 'axios';
 import {
     ArrowLeft, Search, Filter, MoreHorizontal,
     Calendar, CheckCircle, FileText, AlertCircle,
-    ChevronDown, Plus, Edit2, X, Upload, ExternalLink, Shield
+    ChevronDown, Plus, Edit2, X, Upload
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 
