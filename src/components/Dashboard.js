@@ -65,7 +65,7 @@ const Dashboard = () => {
     if (loading) return <div className="p-8 text-center text-gray-500">Loading Dashboard...</div>;
 
     return (
-        <div className="p-6 space-y-8 animate-fade-in pb-20">
+        <div className="p-6 space-y-6 animate-fade-in pb-20">
             {/* HEADER & FILTERS */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
@@ -104,124 +104,139 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* FRAMEWORK STATUS CARDS */}
-            <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-blue-600" /> Framework Status
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredFrameworks.map(fw => (
-                        <div
-                            key={fw.id}
-                            onClick={() => navigate(`/frameworks/${fw.id}`)}
-                            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group relative overflow-hidden"
-                        >
-                            <div className="flex justify-between items-start mb-4 relative z-10">
-                                <h3 className="text-lg font-bold text-gray-900">{fw.name}</h3>
-                                <span className={`px-2 py-1 rounded text-xs font-bold ${fw.completion_percentage === 100 ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
-                                    {fw.completion_percentage === 100 ? 'COMPLIANT' : 'ACTIVE'}
-                                </span>
-                            </div>
+            {/* MAIN CONTENT GRID (2 COLUMNS) */}
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-                            <div className="flex items-end gap-2 mb-4 relative z-10">
-                                <span className="text-4xl font-extrabold text-gray-900">{fw.completion_percentage}%</span>
-                                <span className="text-sm text-gray-500 mb-1">Implemented</span>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="w-full bg-gray-100 rounded-full h-2 mb-4 relative z-10">
-                                <div
-                                    className={`h-2 rounded-full transition-all duration-1000 ${percentageColor(fw.completion_percentage)}`}
-                                    style={{ width: `${fw.completion_percentage}%` }}
-                                ></div>
-                            </div>
-
-                            <div className="flex justify-between text-xs text-gray-500 relative z-10 border-t border-gray-50 pt-3">
-                                <span className="flex items-center gap-1">
-                                    <CheckCircle className="w-3 h-3 text-green-500" /> {fw.implemented_controls} / {fw.total_controls} Controls
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <Activity className="w-3 h-3 text-blue-500" /> Auto-Testing On
-                                </span>
-                            </div>
-
-                            {/* Decorative Background Blob */}
-                            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gray-50 rounded-full group-hover:bg-blue-50 transition-colors z-0"></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* ACTION CENTER (Due Soon) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Due Soon Column */}
-                <div className="lg:col-span-2">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-orange-500" /> Action Required (Due Soon)
+                {/* LEFT COLUMN: FRAMEWORKS (Expands to fill) */}
+                <div className="flex-1 w-full space-y-6">
+                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-600" /> Framework Status
                     </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="divide-y divide-gray-100">
-                            {actionItems.map(item => (
-                                <div key={item.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${itemSeverityColor(item.severity)}`}>
-                                            {item.type === 'Vulnerability' && <Zap className="w-5 h-5" />}
-                                            {item.type === 'Policy' && <FileText className="w-5 h-5" />}
-                                            {item.type === 'CAPA' && <AlertTriangle className="w-5 h-5" />}
-                                            {item.type === 'Training' && <CheckCircle className="w-5 h-5" />}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {filteredFrameworks.map(fw => (
+                            <div
+                                key={fw.id}
+                                onClick={() => navigate(`/frameworks/${fw.id}`)}
+                                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group relative overflow-hidden"
+                            >
+                                <div className="flex justify-between items-start mb-4 relative z-10">
+                                    <h3 className="text-lg font-bold text-gray-900 line-clamp-1" title={fw.name}>{fw.name}</h3>
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${fw.completion_percentage === 100 ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
+                                        {fw.completion_percentage === 100 ? 'COMPLIANT' : 'ACTIVE'}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-end gap-2 mb-4 relative z-10">
+                                    <span className="text-4xl font-extrabold text-gray-900">{fw.completion_percentage}%</span>
+                                    <span className="text-sm text-gray-500 mb-1">Implemented</span>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="w-full bg-gray-100 rounded-full h-2 mb-4 relative z-10">
+                                    <div
+                                        className={`h-2 rounded-full transition-all duration-1000 ${percentageColor(fw.completion_percentage)}`}
+                                        style={{ width: `${fw.completion_percentage}%` }}
+                                    ></div>
+                                </div>
+
+                                <div className="flex justify-between text-xs text-gray-500 relative z-10 border-t border-gray-50 pt-3">
+                                    <span className="flex items-center gap-1">
+                                        <CheckCircle className="w-3 h-3 text-green-500" /> {fw.implemented_controls} / {fw.total_controls} Controls
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Activity className="w-3 h-3 text-blue-500" /> Auto-Testing On
+                                    </span>
+                                </div>
+
+                                {/* Decorative Background Blob */}
+                                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gray-50 rounded-full group-hover:bg-blue-50 transition-colors z-0"></div>
+                            </div>
+                        ))}
+                        {/* Add Framework Button Card */}
+                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center text-gray-400 hover:border-blue-300 hover:text-blue-500 cursor-pointer transition-colors min-h-[220px]">
+                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                                <span className="text-2xl">+</span>
+                            </div>
+                            <span className="font-medium text-sm">Add New Framework</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT COLUMN: WIDGETS (Fixed width on large screens) */}
+                <div className="w-full lg:w-96 space-y-8 flex-shrink-0">
+
+                    {/* Action Required (Due Soon) */}
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-orange-500" /> Action Required
+                        </h2>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="divide-y divide-gray-100">
+                                {actionItems.map(item => (
+                                    <div key={item.id} className="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors cursor-pointer group">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${itemSeverityColor(item.severity)}`}>
+                                            {item.type === 'Vulnerability' && <Zap className="w-4 h-4" />}
+                                            {item.type === 'Policy' && <FileText className="w-4 h-4" />}
+                                            {item.type === 'CAPA' && <AlertTriangle className="w-4 h-4" />}
+                                            {item.type === 'Training' && <CheckCircle className="w-4 h-4" />}
                                         </div>
-                                        <div>
-                                            <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight mb-1 group-hover:text-blue-600">{item.title}</h4>
+                                            </div>
                                             <p className="text-xs text-gray-500 flex items-center gap-2">
-                                                {item.type} • Due: <span className="font-medium text-orange-600">{item.due}</span>
+                                                <span className="font-medium text-orange-600 whitespace-nowrap">Due: {item.due}</span>
+                                                <span>•</span>
+                                                <span>{item.type}</span>
                                             </p>
                                         </div>
                                     </div>
-                                    <button className="px-3 py-1 text-xs font-medium text-gray-600 border border-gray-200 rounded hover:bg-gray-100">
-                                        Fix
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="bg-gray-50 p-3 text-center border-t border-gray-200">
-                            <button className="text-sm text-blue-600 font-medium hover:text-blue-800">View All Actions</button>
+                                ))}
+                            </div>
+                            <div className="bg-gray-50 p-2 text-center border-t border-gray-200">
+                                <button className="text-xs text-blue-600 font-bold uppercase tracking-wider hover:text-blue-800">View All Actions</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Compliance Capability (Mini Stats) */}
-                <div>
-                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-purple-600" /> Capabilities
-                    </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-700">Continuous Monitoring</span>
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">ACTIVE</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-700">Evidence Collection</span>
-                            <span className="text-sm font-bold text-gray-900">98% Healthy</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-700">Policy Adherence</span>
-                            <span className="text-sm font-bold text-orange-600">Needs Review</span>
-                        </div>
+                    {/* Compliance Capability (Mini Stats) */}
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Activity className="w-5 h-5 text-purple-600" /> Capabilities
+                        </h2>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-700">Continuous Monitoring</span>
+                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">ACTIVE</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-700">Evidence Collection</span>
+                                <span className="text-sm font-bold text-gray-900">98% Healthy</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-700">Policy Adherence</span>
+                                <span className="text-sm font-bold text-orange-600">Needs Review</span>
+                            </div>
 
-                        <div className="pt-4 border-t border-gray-100">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Pending Tasks</h4>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>Vendor Reviews</span>
-                                    <span className="font-bold">3 Due</span>
+                            <div className="pt-4 border-t border-gray-100">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase">Pending Tasks</h4>
+                                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 rounded-full font-bold">4</span>
                                 </div>
-                                <div className="flex justify-between text-sm">
-                                    <span>Access Reviews</span>
-                                    <span className="font-bold">1 Overdue</span>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm hover:bg-gray-50 p-1 rounded cursor-pointer transition-colors">
+                                        <span className="text-gray-600">Vendor Reviews</span>
+                                        <span className="font-bold text-red-500">3 Due</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm hover:bg-gray-50 p-1 rounded cursor-pointer transition-colors">
+                                        <span className="text-gray-600">Access Reviews</span>
+                                        <span className="font-bold text-orange-500">1 Overdue</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
