@@ -209,6 +209,33 @@ const FrameworkDetail = () => {
         fetchData();
     }, [id]);
 
+    const handleFileUpload = async (e, controlId) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("control_id", controlId);
+        formData.append("title", file.name);
+        formData.append("description", "Uploaded via Dashboard");
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_URL}/evidence/upload`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            alert("File uploaded successfully!");
+            // Refresh data to show updated stats
+            fetchData();
+        } catch (error) {
+            console.error("Upload failed", error);
+            alert("Upload failed. Please try again.");
+        }
+    };
+
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
