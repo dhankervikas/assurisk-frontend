@@ -39,7 +39,7 @@ const FrameworkDetail_HIPAA = () => {
 
             const [fwRes, ctrlRes] = await Promise.all([
                 axios.get(`${API_URL}/frameworks/${id}`, { headers }),
-                axios.get(`${API_URL}/controls/`, { headers })
+                axios.get(`${API_URL}/controls/?limit=1000`, { headers })
             ]);
 
             setFramework(fwRes.data);
