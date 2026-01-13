@@ -559,7 +559,18 @@ const FrameworkDetail = () => {
                                                         <p className="text-xs text-gray-500">Required for compliance.</p>
                                                     </div>
                                                 </div>
-                                                <button className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">Upload</button>
+                                                <input
+                                                    type="file"
+                                                    id={`file-upload-${i}`}
+                                                    className="hidden"
+                                                    onChange={(e) => handleFileUpload(e, selectedControl.id)}
+                                                />
+                                                <button
+                                                    onClick={() => document.getElementById(`file-upload-${i}`).click()}
+                                                    className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50"
+                                                >
+                                                    Upload
+                                                </button>
                                             </div>
                                         ));
                                     })()}
