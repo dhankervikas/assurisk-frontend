@@ -79,6 +79,13 @@ const FrameworkDetail_HIPAA = () => {
 
     const handleBack = () => navigate('/dashboard');
 
+    // FILTERING - RESTORED
+    const filteredControls = controls.filter(c => {
+        const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesGroup = selectedSafeguard === "All" || c.safeguard === selectedSafeguard;
+        return matchesSearch && matchesGroup;
+    });
+
     if (loading) return <div className="p-10 text-center text-gray-400">Loading HIPAA Protocols...</div>;
     if (error) return (
         <div className="p-8 m-8 bg-red-50 border border-red-200 rounded-xl text-center">
