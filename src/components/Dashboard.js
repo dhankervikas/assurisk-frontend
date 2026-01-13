@@ -39,19 +39,19 @@ const Dashboard = () => {
                 }
             }));
 
-            // SORT LOGIC: ISO 27001 & SOC 2 First
+            // SORT LOGIC: Strict Order [ISO, SOC2, Others]
             const sortedFrameworks = frameworksWithStats.sort((a, b) => {
-                const priority = ["ISO", "SOC2"]; // Priority Codes (Partial Match)
+                const codeA = (a.code || "").toUpperCase();
+                const codeB = (b.code || "").toUpperCase();
 
-                const getPriority = (code) => {
-                    if (!code) return 99;
-                    if (code.includes("ISO27001")) return 1;
-                    if (code.includes("SOC2")) return 2;
-                    return 99;
+                // Explicit Priority Map
+                const priority = {
+                    "ISO27001": 1,
+                    "SOC2": 2
                 };
 
-                const pA = getPriority(a.code);
-                const pB = getPriority(b.code);
+                const pA = priority[codeA] || priority[Object.keys(priority).find(k => codeA.includes(k))] || 99;
+                const pB = priority[codeB] || priority[Object.keys(priority).find(k => codeB.includes(k))] || 99;
 
                 if (pA !== pB) return pA - pB;
                 return a.name.localeCompare(b.name);
