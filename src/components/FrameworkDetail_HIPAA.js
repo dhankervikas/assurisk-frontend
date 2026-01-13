@@ -40,14 +40,20 @@ const FrameworkDetail_HIPAA = () => {
 
             const [fwRes, ctrlRes] = await Promise.all([
                 axios.get(`${API_URL}/frameworks/${id}`, { headers }),
-                // USE SERVER-SIDE FILTERING - ROBUST
-                axios.get(`${API_URL}/controls/?framework_id=${id}&limit=1000`, { headers })
+                // REVERT TO CLIENT-SIDE FILTERING (Robustness)
+                // Fetch ALL controls (limit=1000) and filter locally to avoid any API query param issues
+                axios.get(`${API_URL}/controls/?limit=1000`, { headers })
             ]);
 
             setFramework(fwRes.data);
 
-            // Controls are already filtered by the API
-            const fwControls = ctrlRes.data;
+            // Manual Client-Side Filter
+            // Ensure types match (API returns framework_id as int, id param is string)
+            const allControls = ctrlRes.data;
+            const targetId = parseInt(id);
+            const fwControls = allControls.filter(c => c.framework_id === targetId);
+
+            console.log(`Debug: Client-Side Filter. TargetID: ${targetId}. Found: ${fwControls.length} out of ${allControls.length}`);
 
             // Enrich with HIPAA Metadata parsed from Title
             // Format: "164.308(a)(1)(i) ... (Required)"
@@ -62,7 +68,6 @@ const FrameworkDetail_HIPAA = () => {
                 return { ...c, implementationSpec, safeguard };
             });
 
-            console.log(`Debug: Loaded ${enriched.length} controls for Framework ${id}`);
             setControls(enriched);
             setLoading(false);
 
