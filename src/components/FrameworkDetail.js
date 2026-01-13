@@ -20,26 +20,64 @@ const COSO_DESCRIPTIONS = {
     "DEFAULT": "Standard requirement for this criteria."
 };
 
-// REQUIRED EVIDENCE MAP (Mocked Knowledge Base)
-const REQUIRED_EVIDENCE = {
-    "CC1.1": [
-        { name: "Signed Code of Conduct", type: "Policy" },
-        { name: "Confidentiality Agreements (Employee)", type: "Contract" },
-        { name: "Background Check Records", type: "Log" }
+// GRANULAR EVIDENCE MAPPING (Keyed by Control Title Partial Match or Exact ID)
+// This overrides the generic category map for specific controls.
+const SPECIFIC_EVIDENCE_MAP = {
+    "Background checks performed for new hires": [
+        { name: "Background Check Policy", type: "Policy" },
+        { name: "Sample Background Check Reports (Anonymized)", type: "Evidence" },
+        { name: "New Hire Checklist (showing check completion)", type: "Log" }
     ],
-    "CC1.2": [
-        { name: "Board Meeting Minutes (Q1-Q4)", type: "Report" },
-        { name: "Audit Committee Charter", type: "Policy" }
+    "Code of Conduct acknowledged by contractors": [
+        { name: "Code of Conduct Policy", type: "Policy" },
+        { name: "Contractor Acknowledgement Log", type: "Log" },
+        { name: "Sample Signed Contractor Agreements", type: "Contract" }
     ],
-    "CC6.1": [
-        { name: "Physical Access Logs", type: "Log" },
-        { name: "Visitor Logbook", type: "Log" },
-        { name: "CCTV Retention Policy", type: "Policy" }
+    "Confidentiality Agreement acknowledged by contractors": [
+        { name: "NDA Template", type: "Policy" },
+        { name: "Contractor NDA Registry", type: "Log" }
     ],
-    "DEFAULT": [
-        { name: "Standard Policy Document", type: "Policy" },
-        { name: "Proof of Implementation", type: "Screenshot/Log" }
+    "Confidentiality Agreement acknowledged by employees": [
+        { name: "Employee Handbook / NDA Section", type: "Policy" },
+        { name: "Signed Employee NDAs (Sample)", type: "Evidence" }
+    ],
+    "Conflict of Interest Policy review": [
+        { name: "Conflict of Interest Policy", type: "Policy" },
+        { name: "Annual COI Disclosure Log", type: "Log" }
+    ],
+    "Board meeting minutes review": [
+        { name: "Board Meeting Minutes (Q1)", type: "Minutes" },
+        { name: "Board Meeting Minutes (Q2)", type: "Minutes" },
+        { name: "Board Meeting Minutes (Q3)", type: "Minutes" },
+        { name: "Board Meeting Minutes (Q4)", type: "Minutes" }
+    ],
+    "Quarterly security compliance report to Board": [
+        { name: "Security Presentation Deck (Q1)", type: "Report" },
+        { name: "Security Presentation Deck (Q3)", type: "Report" }
+    ],
+    "Charter of the Audit Committee": [
+        { name: "Audit Committee Charter Document", type: "Policy" },
+        { name: "Committee Member List", type: "List" }
+    ],
+    "Organizational Chart is current": [
+        { name: "Current Organizational Chart", type: "Diagram" },
+        { name: "HR System Export", type: "List" }
+    ],
+    "Job Descriptions include security responsibilities": [
+        { name: "Sample Job Descriptions (Engineering)", type: "HR Doc" },
+        { name: "Sample Job Descriptions (Admin)", type: "HR Doc" }
+    ],
+    "Segregation of Duties Matrix": [
+        { name: "Segregation of Duties (SoD) Matrix", type: "Sheet" },
+        { name: "Access Rights Review Log", type: "Log" }
     ]
+};
+
+// FALLBACK CATEGORY MAP
+const REQUIRED_EVIDENCE_DEFAULTS = {
+    "CC1.1": [{ name: "Ethics Policy", type: "Policy" }],
+    "CC6.1": [{ name: "Access Logs", type: "Log" }],
+    "DEFAULT": [{ name: "Standard Policy Document", type: "Policy" }, { name: "Evidence of Execution", type: "Evidence" }]
 };
 
 const FrameworkDetail = () => {
@@ -130,6 +168,20 @@ const FrameworkDetail = () => {
     // Helper to determine if a specific mock requirement is met based on the random 'uploaded' count
     const isRequirementMet = (index, uploadedCount) => {
         return index < uploadedCount;
+    };
+
+    // NEW LOGIC: Get Specific Requirements
+    const getRequirements = (control) => {
+        // 1. Try Specific Title Match
+        if (SPECIFIC_EVIDENCE_MAP[control.title]) {
+            return SPECIFIC_EVIDENCE_MAP[control.title];
+        }
+        // 2. Try Category Match
+        if (REQUIRED_EVIDENCE_DEFAULTS[control.category]) {
+            return REQUIRED_EVIDENCE_DEFAULTS[control.category];
+        }
+        // 3. Fallback
+        return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
     };
 
     return (
@@ -251,9 +303,14 @@ const FrameworkDetail = () => {
                         </button>
 
                         <div className="p-8 pb-4 border-b border-gray-100">
-                            <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded mb-2 inline-block">
-                                {selectedControl.category}
-                            </span>
+                            <div className="flex gap-2 mb-2">
+                                <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded inline-block">
+                                    {selectedControl.category}
+                                </span>
+                                <span className="text-xs font-bold text-gray-500 px-2 py-1 bg-gray-100 rounded inline-block font-mono">
+                                    {selectedControl.control_id}
+                                </span>
+                            </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
                             <p className="text-gray-500 text-sm">
                                 {COSO_DESCRIPTIONS[selectedControl.category] || selectedControl.description}
@@ -265,12 +322,12 @@ const FrameworkDetail = () => {
                             {/* STANDARD REQUIREMENTS SECTION */}
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
                                 <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                    <Shield className="w-5 h-5" /> Standard Requirements ({selectedControl.category})
+                                    <Shield className="w-5 h-5" /> Standard Requirements
                                 </h3>
 
                                 <div className="space-y-3">
                                     {(() => {
-                                        const reqs = REQUIRED_EVIDENCE[selectedControl.category] || REQUIRED_EVIDENCE["DEFAULT"];
+                                        const reqs = getRequirements(selectedControl);
                                         const stats = getEvidenceStats(selectedControl.control_id);
 
                                         return reqs.map((req, idx) => {
@@ -304,7 +361,7 @@ const FrameworkDetail = () => {
                                 </h3>
                                 <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
                                     {(() => {
-                                        const reqs = REQUIRED_EVIDENCE[selectedControl.category] || REQUIRED_EVIDENCE["DEFAULT"];
+                                        const reqs = getRequirements(selectedControl);
                                         const stats = getEvidenceStats(selectedControl.control_id);
                                         const missing = reqs.filter((_, idx) => !isRequirementMet(idx, stats.uploaded));
 
@@ -318,7 +375,7 @@ const FrameworkDetail = () => {
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-900">Upload {req.name}</p>
-                                                        <p className="text-xs text-gray-500">Required for {selectedControl.category} compliance.</p>
+                                                        <p className="text-xs text-gray-500">Required for compliance.</p>
                                                     </div>
                                                 </div>
                                                 <button className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">Upload</button>
