@@ -54,11 +54,29 @@ const COSO_DESCRIPTIONS = {
     "P1.0": "Privacy: Notice and choice.",
     "P2.0": "Privacy: Collection, use, retention, and disposal.",
 
-    // ISO 27001 CLAUSES
-    "Organizational controls": "Clause 5: Organizational controls (37 controls)",
-    "People controls": "Clause 6: People controls (8 controls)",
-    "Physical controls": "Clause 7: Physical controls (14 controls)",
-    "Technological controls": "Clause 8: Technological controls (34 controls)",
+    // ISO 27001 PROCESS GROUPS (Custom Restructure)
+    "1. Governance & Policy": "Clauses 4-7 & Annex A.5: Leadership, Policies, and Organizational Context",
+    "2. HR Security": "Clauses 7 & Annex A.6: Human Resource Security (Screening to Termination)",
+    "3. Asset Management": "Annex A.5, A.7, A.8: Inventory, Responsibility, and Media Handling",
+    "4. Access Control (IAM)": "Annex A.5 & A.8: Logical Access, User Rights, and Authentication",
+    "5. Physical Security": "Annex A.7: Secure Areas, Equipment, and Physical Entry",
+    "6. Operations (General)": "Annex A.8: Malware, Backup, Logging, and Data Protection",
+    "7. Configuration Management": "Annex A.8.9: Secure Configurations",
+    "8. Cryptography": "Annex A.8.24: Encryption and Key Management",
+    "9. Logging & Monitoring": "Annex A.8.15-16: Event Logging and System Monitoring",
+    "10. Clock Synchronization": "Annex A.8.17: Time Synchronization (NTP)",
+    "11. Vulnerability Management": "Annex A.8.8: Technical Vulnerabilities",
+    "12. Capacity Management": "Annex A.8.6: Resource Management",
+    "13. Backup Management": "Annex A.8.13: Information Backup",
+    "14. Network Security": "Annex A.5 & A.8: Network Services, Segregation, and Transfer",
+    "15. SDLC (Development)": "Annex A.8: Secure Development, Testing, and Change Management",
+    "16. Supplier Mgmt": "Annex A.5: Supplier Relationships and Service Monitoring",
+    "17. Incident & Resilience": "Clause 7.4 & Annex A.5: Incident Management and Business Continuity",
+    "18. Threat Intel": "Annex A.5.7: Threat Intelligence",
+    "19. Legal & Compliance": "Annex A.5 & A.8: Legal Requirements, Privacy, and IPR",
+    "20. Risk Management": "Clauses 6 & 8: Risk Assessment and Treatment",
+    "21. Performance Evaluation": "Clauses 9 & Annex A.5: Audit, Review, and Monitoring",
+    "22. Improvement": "Clause 10: Corrective Action and Continual Improvement",
 
     "DEFAULT": "Standard requirement for this criteria."
 };
