@@ -67,6 +67,102 @@ const Dashboard = () => {
         }
     };
 
+    const handleSeed = async () => {
+        if (!window.confirm("WARNING: This will re-initialize the database with standard Frameworks and Controls. Any existing data might be duplicated. Continue?")) return;
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const headers = { Authorization: `Bearer ${token}` };
+
+            // 1. Define Frameworks
+            const seeds = [
+                { name: 'Health Insurance Portability and Accountability Act', code: 'HIPAA', description: 'United States legislation that provides data privacy and security provisions for safeguarding medical information.' },
+                { name: 'SOC 2 Type II', code: 'SOC2', description: 'Service Organization Control 2 - Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy.' },
+                { name: 'ISO 27001:2013', code: 'ISO27001', description: 'International standard for information security management systems (ISMS).' },
+                { name: 'NIST CSF 2.0', code: 'NIST-CSF', description: 'National Institute of Standards and Technology Cybersecurity Framework.' },
+                { name: 'GDPR Privacy', code: 'GDPR', description: 'General Data Protection Regulation for EU data privacy.' }
+            ];
+
+            // 2. Create Frameworks and Capture IDs
+            const createdFws = [];
+            for (const fw of seeds) {
+                try {
+                    // Try to create
+                    const res = await axios.post(`${API_URL}/frameworks/`, fw, { headers });
+                    createdFws.push(res.data);
+                } catch (e) {
+                    console.warn(`Skipping ${fw.code} (might exist)`, e);
+                    // If failed, try to find it in current list to use its ID
+                    // This is a minimal fallback
+                }
+            }
+
+            // Refetch to get ALL IDs (including existing ones)
+            const allFwRes = await axios.get(`${API_URL}/frameworks/`, { headers });
+            const allFws = allFwRes.data;
+
+            // 3. Define Standard Controls for each Framework code
+            const controlsMap = {
+                'HIPAA': [
+                    { title: "164.308(a)(1)(i) - Security Management Process", description: "Implement policies and procedures to prevent, detect, contain, and correct security violations." },
+                    { title: "164.308(a)(5)(ii)(B) - Protection from Malicious Software", description: "Procedures for guarding against, detecting, and reporting malicious software." },
+                    { title: "164.312(a)(1) - Access Control", description: "Implement technical policies and procedures for electronic information systems to maintain electronic protected health information." },
+                    { title: "164.310(a)(1) - Facility Access Controls", description: "Implement policies and procedures to limit physical access to electronic information systems and the facility or facilities in which they are housed." },
+                    { title: "164.312(a)(2)(IV) - Encryption and Decryption", description: "Implement a mechanism to encrypt and decrypt electronic protected health information." }
+                ],
+                'SOC2': [
+                    { title: "CC6.1 - Logical Access Security", description: "The entity implements logical access security software, infrastructure, and architectures over protected information assets to protect them from security events to meet the entity's objectives.", category: "CC6.1" },
+                    { title: "CC6.8 - Prevent Unauthorized Malicious Software", description: "The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software to meet the entity's objectives.", category: "CC6.8" },
+                    { title: "CC7.1 - System Configuration Monitor", description: "Information assets are monitored to identify changes to configurations that may result in the introduction of vulnerabilities.", category: "CC7.1" },
+                    { title: "CC8.1 - Change Management", description: "The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures.", category: "CC8.1" }
+                ],
+                'ISO27001': [
+                    { title: "A.5.15 - Access Control", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established." },
+                    { title: "A.8.2 - Privileged Access Rights", description: "The allocation and use of privileged access rights shall be restricted and managed." },
+                    { title: "A.12.3 - Backup", description: "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy." },
+                    { title: "A.14.2 - Secure Development Policy", description: "Rules for the development of software and systems shall be established and applied to developments within the organization." }
+                ],
+                'NIST-CSF': [
+                    { title: "ID.AM-1 - Inventory", description: "Physical devices and systems within the organization are inventoried." },
+                    { title: "PR.AC-1 - Access Control", description: "Access to assets and associated facilities is limited to authorized users, processes, or devices." }
+                ],
+                'GDPR': [
+                    { title: "Art. 32 - Security of Processing", description: "Implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk." },
+                    { title: "Art. 15 - Right of Access", description: "The data subject shall have the right to obtain from the controller confirmation as to whether or not personal data concerning him or her are being processed." }
+                ]
+            };
+
+            // 4. Create Controls
+            const controlPromises = [];
+            for (const fw of allFws) {
+                const controlsToCreate = controlsMap[fw.code];
+                if (controlsToCreate) {
+                    controlsToCreate.forEach(c => {
+                        const payload = {
+                            framework_id: fw.id,
+                            control_id: c.title.split(' - ')[0], // Extract minimal ID
+                            title: c.title,
+                            description: c.description,
+                            category: c.category || "General",
+                            status: "NOT_STARTED" // Default
+                        };
+                        controlPromises.push(axios.post(`${API_URL}/controls/`, payload, { headers }));
+                    });
+                }
+            }
+
+            await Promise.allSettled(controlPromises);
+
+            alert("Database re-initialized with Frameworks and Controls! Reloading...");
+            window.location.reload();
+        } catch (err) {
+            console.error("Seeding failed", err);
+            alert(`Seeding failed using API ${API_URL}`);
+            setLoading(false);
+        }
+    };
+
     if (error) {
         return (
             <div className="p-8 text-center text-red-500">
@@ -150,13 +246,17 @@ const Dashboard = () => {
                     {/* DIAGNOSTIC FOR EMPTY LIST */}
                     {frameworks.length === 0 && !loading && (
                         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl text-yellow-800 text-sm font-mono">
-                            <strong>DEBUG: No Frameworks Found.</strong>
-                            <br />
-                            API URL: {API_URL}
-                            <br />
-                            Total items in state: {frameworks.length}
-                            <br />
-                            Check console for network errors.
+                            <div className="mb-2">
+                                <strong>DEBUG: No Frameworks Found.</strong><br />
+                                API URL: {API_URL}<br />
+                                Total items in state: {frameworks.length}
+                            </div>
+                            <button
+                                onClick={handleSeed}
+                                className="px-4 py-2 bg-yellow-600 text-white font-bold rounded hover:bg-yellow-700 transition-colors shadow-sm"
+                            >
+                                🛠 Repair / Seed Database
+                            </button>
                         </div>
                     )}
 
