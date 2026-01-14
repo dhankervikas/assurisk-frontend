@@ -51,7 +51,13 @@ const FrameworkDetail_HIPAA = () => {
             // Ensure types match (API returns framework_id as int, id param is string)
             const allControls = ctrlRes.data;
             const targetId = parseInt(id);
-            const fwControls = allControls.filter(c => c.framework_id === targetId);
+
+            // DIAGNOSTIC 
+            const uniqueFwIds = [...new Set(allControls.map(c => c.framework_id))];
+            console.log("Available Framework IDs in Controls:", uniqueFwIds);
+
+            // Robust Filter: Handle string/int mismatch just in case
+            const fwControls = allControls.filter(c => c.framework_id == targetId);
 
             console.log(`Debug: Client-Side Filter. TargetID: ${targetId}. Found: ${fwControls.length} out of ${allControls.length}`);
 
@@ -71,10 +77,14 @@ const FrameworkDetail_HIPAA = () => {
             setControls(enriched);
             setLoading(false);
 
-            setControls(enriched);
-            setLoading(false);
-            setControls(enriched);
-            setLoading(false);
+            // Store diagnostic info for UI
+            window.hipaaDebug = {
+                targetId,
+                foundCount: enriched.length,
+                totalControls: allControls.length,
+                availableIds: uniqueFwIds
+            };
+
         } catch (err) {
             console.error("Error fetching HIPAA data:", err);
             setError(err.message || "Failed to load data"); // Capture error
@@ -185,12 +195,21 @@ const FrameworkDetail_HIPAA = () => {
                         <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
                             <Shield className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                             <p className="text-gray-500 font-medium">No safeguards found matching your filters.</p>
+                            {/* DIAGNOSTIC MESSAGE IF ZERO RESULTS */}
+                            {controls.length === 0 && (
+                                <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 text-xs text-left font-mono rounded overflow-auto max-w-lg mx-auto">
+                                    <strong>DIAGNOSTIC INFO:</strong><br />
+                                    Target Framework ID: {id}<br />
+                                    Total Controls Fetched: {window.hipaaDebug?.totalControls || '?'}<br />
+                                    Available Framework IDs in DB: {JSON.stringify(window.hipaaDebug?.availableIds || [])}
+                                </div>
+                            )}
                         </div>
                     )}
 
                     {/* DEBUG FOOTER - TEMPORARY */}
                     <div className="mt-8 p-4 bg-gray-100 rounded text-xs text-gray-400 font-mono">
-                        DEBUG: Framework ID: {id} | Total Controls Loaded: {controls.length} | Filtered View: {filteredControls.length}
+                        DEBUG: Framework ID: {id} | Total Controls Loaded: {controls.length} | Available IDs: {JSON.stringify(window.hipaaDebug?.availableIds || [])}
                     </div>
                 </div>
             </div>

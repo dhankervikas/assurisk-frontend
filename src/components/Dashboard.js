@@ -145,6 +145,20 @@ const Dashboard = () => {
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <Shield className="w-5 h-5 text-blue-600" /> Framework Status
                     </h2>
+
+                    {/* DIAGNOSTIC FOR EMPTY LIST */}
+                    {frameworks.length === 0 && !loading && (
+                        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl text-yellow-800 text-sm font-mono">
+                            <strong>DEBUG: No Frameworks Found.</strong>
+                            <br />
+                            API URL: {API_URL}
+                            <br />
+                            Total items in state: {frameworks.length}
+                            <br />
+                            Check console for network errors.
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {filteredFrameworks.map(fw => (
                             <div
