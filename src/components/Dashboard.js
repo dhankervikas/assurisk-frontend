@@ -199,8 +199,7 @@ const Dashboard = () => {
                             title: c.title,
                             description: c.description,
                             category: c.category || "General",
-                            // Use the auto-detected valid status
-                            status: validStatus
+                            status: "not_started"
                         };
                         await axios.post(`${API_URL}/controls/`, payload, { headers });
                         controlsAdded++;
