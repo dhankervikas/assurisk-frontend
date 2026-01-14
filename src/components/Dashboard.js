@@ -249,6 +249,16 @@ const Dashboard = () => {
                     <span className="block sm:inline">Please click the Red "Repair / Populate Data" button above to restore your framework data (ISO 2022).</span>
                 </div>
 
+                {/* SEED LOG - DEBUG OUTPUT */}
+                {seedLog.length > 0 && (
+                    <div className="w-full bg-black text-green-400 p-4 rounded-xl font-mono text-xs overflow-y-auto max-h-60">
+                        <h3 className="border-b border-gray-700 mb-2 pb-1 font-bold">REPAIR PROCESS LOG:</h3>
+                        {seedLog.map((log, i) => (
+                            <div key={i}>{log}</div>
+                        ))}
+                    </div>
+                )}
+
                 {/* LEFT COLUMN: FRAMEWORKS (Expands to fill) */}
                 <div className="flex-1 w-full space-y-6">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
