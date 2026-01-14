@@ -79,7 +79,7 @@ const Dashboard = () => {
             const seeds = [
                 { name: 'Health Insurance Portability and Accountability Act', code: 'HIPAA', description: 'United States legislation that provides data privacy and security provisions for safeguarding medical information.' },
                 { name: 'SOC 2 Type II', code: 'SOC2', description: 'Service Organization Control 2 - Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy.' },
-                { name: 'ISO 27001:2013', code: 'ISO27001', description: 'International standard for information security management systems (ISMS).' },
+                { name: 'ISO 27001:2022', code: 'ISO27001', description: 'International standard for information security management systems (ISMS).' },
                 { name: 'NIST CSF 2.0', code: 'NIST-CSF', description: 'National Institute of Standards and Technology Cybersecurity Framework.' },
                 { name: 'GDPR Privacy', code: 'GDPR', description: 'General Data Protection Regulation for EU data privacy.' }
             ];
