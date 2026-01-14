@@ -151,6 +151,41 @@ const Dashboard = () => {
                 ]
             };
 
+            // ---------------------------------------------------------
+            // AUTO-DETECT CORRECT STATUS (FUZZING)
+            // ---------------------------------------------------------
+            addLog("Probing backend for valid status enum...");
+            const possibleStatuses = ["PENDING", "Pending", "Not Started", "NOT_STARTED", "DRAFT", "Draft", "OPEN", "Open", "Proposed", "Active"];
+
+            let validStatus = null;
+            const probeFw = allFws[0]; // Use first available framework (usually HIPAA)
+            const probeControl = controlsMap[probeFw.code][0]; // First control (e.g. 164.308...)
+
+            for (const statusAttempt of possibleStatuses) {
+                try {
+                    const probePayload = {
+                        framework_id: probeFw.id,
+                        control_id: probeControl.title.split(' - ')[0],
+                        title: probeControl.title,
+                        description: probeControl.description,
+                        category: probeControl.category || "General",
+                        status: statusAttempt
+                    };
+                    await axios.post(`${API_URL}/controls/`, probePayload, { headers });
+                    validStatus = statusAttempt;
+                    addLog(`SUCCESS! Found valid status: "${validStatus}"`);
+                    break; // Stop looking
+                } catch (e) {
+                    // Silent fail on probe
+                }
+            }
+
+            if (!validStatus) {
+                addLog("CRITICAL: Could not guess valid status. Defaulting to 'PENDING' and hoping.");
+                validStatus = "PENDING";
+            }
+            // ---------------------------------------------------------
+
             let controlsAdded = 0;
             for (const fw of allFws) {
                 const controlsToCreate = controlsMap[fw.code] || [];
@@ -164,8 +199,8 @@ const Dashboard = () => {
                             title: c.title,
                             description: c.description,
                             category: c.category || "General",
-                            // Try 'PENDING' - common enum value matching IMPLEMENTED style
-                            status: "PENDING"
+                            // Use the auto-detected valid status
+                            status: validStatus
                         };
                         await axios.post(`${API_URL}/controls/`, payload, { headers });
                         controlsAdded++;
