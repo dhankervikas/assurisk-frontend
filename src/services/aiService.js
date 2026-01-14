@@ -1,0 +1,61 @@
+import axios from 'axios';
+
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+export const AIService = {
+    /**
+     * Generates a policy document based on the control details.
+     * @param {string} controlTitle - e.g. "A.5.15 - Access Control"
+     * @param {string} description - e.g. "Rules to control physical and logical access..."
+     * @returns {Promise<string>} - The generated markdown policy.
+     */
+    generatePolicy: async (controlTitle, description) => {
+        const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("Missing API Key. Please add REACT_APP_OPENAI_API_KEY to your .env file.");
+        }
+
+        try {
+            const prompt = `
+            You are a Chief Information Security Officer (CISO) writing a formal compliance policy.
+            
+            Write a detailed, professional policy section for the following control:
+            Control: "${controlTitle}"
+            Description: "${description}"
+            
+            Format: Markdown
+            Structure:
+            1. Purpose
+            2. Scope
+            3. Policy Statement (Detailed rules)
+            4. Enforcement
+            
+            Keep it concise but compliant with ISO 27001 / SOC 2 standards.
+            `;
+
+            const response = await axios.post(
+                OPENAI_API_URL,
+                {
+                    model: "gpt-4o", // or gpt-3.5-turbo if preferred
+                    messages: [{ role: "user", content: prompt }],
+                    temperature: 0.7,
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            return response.data.choices[0].message.content;
+        } catch (error) {
+            console.error("AI Generation Failed:", error);
+            if (error.response?.status === 401) {
+                throw new Error("Invalid OpenAI API Key.");
+            }
+            throw new Error("Failed to generate policy. Please try again.");
+        }
+    }
+};
