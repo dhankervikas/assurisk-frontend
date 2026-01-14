@@ -101,12 +101,16 @@ const Dashboard = () => {
                 if (existing) {
                     // Check if Upgrade Needed (Specifically for ISO 2013 -> 2022)
                     if (fw.code === 'ISO27001' && existing.name.includes("2013")) {
-                        addLog(`UPGRADING ISO 2013 -> 2022 (ID: ${existing.id})...`);
+                        addLog(`UPGRADING ISO 2013 -> 2022 via RE-CREATION (ID: ${existing.id})...`);
                         try {
-                            await axios.put(`${API_URL}/frameworks/${existing.id}`, fw, { headers });
-                            addLog("SUCCESS: ISO Framework Updated to 2022.");
+                            // DELETE OLD
+                            await axios.delete(`${API_URL}/frameworks/${existing.id}`, { headers });
+                            addLog("Deleted old ISO 2013.");
+                            // CREATE NEW
+                            await axios.post(`${API_URL}/frameworks/`, fw, { headers });
+                            addLog("Created new ISO 2022.");
                         } catch (err) {
-                            addLog(`Update Failed: ${err.message}`);
+                            addLog(`Upgrade Failed: ${err.message} (${err.response?.status})`);
                         }
                     } else {
                         addLog(`${fw.code} exists and looks up to date.`);
@@ -159,7 +163,7 @@ const Dashboard = () => {
             };
 
             let controlsAdded = 0;
-            for (const fw of allFws) { // Use allFws here
+            for (const fw of allFws) {
                 const controlsToCreate = controlsMap[fw.code] || [];
                 addLog(`Processing ${fw.code} (ID: ${fw.id})... Adding ${controlsToCreate.length} controls.`);
 
@@ -176,7 +180,8 @@ const Dashboard = () => {
                         await axios.post(`${API_URL}/controls/`, payload, { headers });
                         controlsAdded++;
                     } catch (e) {
-                        // ignore duplicates
+                        // LOG ERROR instead of swallowing
+                        addLog(`ERR on ${c.title.substring(0, 10)}: ${e.response?.status || e.message}`);
                     }
                 }
             }
