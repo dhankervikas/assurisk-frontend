@@ -10,7 +10,10 @@ import {
     FileText,
     TrendingUp,
     Search,
-    Filter
+    Filter,
+    Activity,
+    Clock,
+    Zap
 } from 'lucide-react';
 import { ISO_CONTROLS, SOC2_CONTROLS, HIPPA_CONTROLS, NIST_CONTROLS, GDPR_CONTROLS } from '../data/seedData';
 
