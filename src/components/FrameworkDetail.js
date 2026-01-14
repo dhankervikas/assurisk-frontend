@@ -528,6 +528,29 @@ const FrameworkDetail = () => {
                         <h1 className="text-3xl font-bold text-gray-900">
                             {framework.name} {useGroupedView && <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(Premium View)</span>}
                         </h1>
+                        <button
+                            onClick={async () => {
+                                if (window.confirm("This will RESET all controls for this framework to the correct 93 ISO controls. Existing progress will be lost. Continue?")) {
+                                    try {
+                                        const response = await fetch(`${API_URL}/frameworks/${framework.id}/seed-controls`, {
+                                            method: 'POST',
+                                        });
+                                        if (response.ok) {
+                                            alert("Data repaired successfully! refreshing...");
+                                            window.location.reload();
+                                        } else {
+                                            const err = await response.json();
+                                            alert("Failed: " + err.detail);
+                                        }
+                                    } catch (error) {
+                                        alert("Error: " + error.message);
+                                    }
+                                }
+                            }}
+                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
+                        >
+                            Repair Data
+                        </button>
                     </div>
                 </div>
             </div>
