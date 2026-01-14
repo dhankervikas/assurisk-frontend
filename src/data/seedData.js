@@ -20,7 +20,9 @@ import {
 // ============================================================================
 export const ISO_CONTROLS = [
     // Governance & Policy
-    { control_id: "4.1", title: "Context of the organization", description: "Determine external and internal issues relevant to the organization's purpose and strategic direction.", category: "Governance & Policy" },
+    { control_id: "4.1", title: "Context of the organization", description: "External issues that are relevant to the organization's purpose are defined.", category: "Governance & Policy" },
+    { control_id: "4.1", title: "Context of the organization", description: "Internal issues that are relevant to the organization's purpose are defined.", category: "Governance & Policy" },
+    { control_id: "4.1", title: "Context of the organization", description: "Information about these external and internal issues is monitored and reviewed.", category: "Governance & Policy" },
     { control_id: "4.2", title: "Needs of interested parties", description: "Determine interested parties and their requirements relevant to information security.", category: "Governance & Policy" },
     { control_id: "4.3", title: "Scope of the ISMS", description: "Determine the boundaries and applicability of the ISMS.", category: "Governance & Policy" },
     { control_id: "4.4", title: "ISMS System", description: "Establish, implement, maintain and continually improve the ISMS.", category: "Governance & Policy" },
