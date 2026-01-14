@@ -184,47 +184,71 @@ export const ISO_CONTROLS = [
 ];
 
 // ============================================================================
-// SOC 2 - COSO MAPPED (CC1.1, etc.)
+// SOC 2 - COSO MAPPED (USER DEFINED P1-P17)
 // ============================================================================
 export const SOC2_CONTROLS = [
-    // CC1: Control Environment
-    { title: "CC1.1 - Values", description: "The entity demonstrates a commitment to integrity and ethical values.", category: "CC1.1" },
-    { title: "CC1.2 - Board", description: "The board of directors exercises oversight of the development and performance of internal control.", category: "CC1.2" },
-    { title: "CC1.3 - Structure", description: "Management establishes structures, reporting lines, and appropriate authorities and responsibilities.", category: "CC1.3" },
-    { title: "CC1.4 - Competence", description: "The entity demonstrates a commitment to attract, develop, and retain competent individuals.", category: "CC1.4" },
-    { title: "CC1.5 - Accountability", description: "The entity holds individuals accountable for their internal control responsibilities.", category: "CC1.5" },
+    // P1: Integrity & Ethics (CC1.1)
+    { title: "CC1.1 - Integrity & Ethics", description: "The entity demonstrates a commitment to integrity and ethical values.", category: "COSO Principle 1" },
 
-    // CC2: Communication
-    { title: "CC2.1 - Info Quality", description: "The entity obtains or generates and uses relevant, quality information.", category: "CC2.1" },
-    { title: "CC2.2 - Internal Comm", description: "The entity internally communicates information.", category: "CC2.2" },
-    { title: "CC2.3 - External Comm", description: "The entity communicates with external parties regarding matters affecting the functioning of internal control.", category: "CC2.3" },
+    // P2: Board Oversight (CC1.2)
+    { title: "CC1.2 - Board Oversight", description: "The board demonstrates independence and exercises oversight of internal control.", category: "COSO Principle 2" },
 
-    // CC3: Risk Assessment
-    { title: "CC3.1 - Objectives", description: "The entity specifies objectives with sufficient clarity.", category: "CC3.1" },
-    { title: "CC3.2 - Risk ID", description: "The entity identifies risks to the achievement of its objectives.", category: "CC3.2" },
-    { title: "CC3.3 - Fraud", description: "The entity considers the potential for fraud in assessing risks.", category: "CC3.3" },
-    { title: "CC3.4 - Changes", description: "The entity identifies and assesses changes that could significantly impact the system.", category: "CC3.4" },
+    // P3: Structure & Authority (CC1.3)
+    { title: "CC1.3 - Structure & Authority", description: "Management establishes structures, reporting lines, and authorities.", category: "COSO Principle 3" },
 
-    // CC4: Monitoring
-    { title: "CC4.1 - Evaluations", description: "The entity selects, develops, and performs ongoing and/or separate evaluations.", category: "CC4.1" },
-    { title: "CC4.2 - Deficiencies", description: "The entity evaluates and communicates internal control deficiencies.", category: "CC4.2" },
+    // P4: Competence (CC1.4)
+    { title: "CC1.4 - Competence", description: "The entity demonstrates a commitment to attract, develop, and retain competent individuals.", category: "COSO Principle 4" },
 
-    // CC5: Control Activities
-    { title: "CC5.1 - Control Acts", description: "The entity selects and develops control activities.", category: "CC5.1" },
-    { title: "CC5.2 - Tech Controls", description: "The entity selects and develops general control activities over technology.", category: "CC5.2" },
-    { title: "CC5.3 - Policies", description: "The entity deploys control activities through policies and procedures.", category: "CC5.3" },
+    // P5: Accountability (CC1.5)
+    { title: "CC1.5 - Accountability", description: "The entity holds individuals accountable for internal control responsibilities.", category: "COSO Principle 5" },
 
-    // LOGICAL ACCESS (CC6) - Using Specific Mapping
-    { title: "CC6.1 - Logical Access", description: "The entity implements logical access security software, infrastructure, and architectures.", category: "CC6.1" },
-    { title: "CC6.2 - User ID", description: "Prior to issuing credentials, the entity identifies and authenticates users.", category: "CC6.2" },
-    { title: "CC6.3 - Authorization", description: "The entity authorizes access to protected information assets.", category: "CC6.3" },
-    { title: "CC6.6 - Physical Access", description: "The entity restricts physical access to facilities.", category: "CC6.6" },
+    // P6: Specific Objectives (CC3.1)
+    { title: "CC3.1 - Specific Objectives", description: "The entity specifies objectives with clarity to enable risk identification.", category: "COSO Principle 6" },
 
-    // OPERATIONS (CC7)
-    { title: "CC7.1 - Vulnerabilities", description: "The entity identifies and manages system vulnerabilities.", category: "CC7.1" },
+    // P7: Risk Identification (CC3.2)
+    { title: "CC3.2 - Risk Identification", description: "The entity identifies and analyzes risks to the achievement of objectives.", category: "COSO Principle 7" },
 
-    // CHANGE MANAGEMENT (CC8)
-    { title: "CC8.1 - Change Mgmt", description: "The entity authorizes, designs, develops, tests, and implements changes.", category: "CC8.1" }
+    // P8: Fraud Risk (CC3.3)
+    { title: "CC3.3 - Fraud Risk", description: "The entity considers the potential for fraud in assessing risks.", category: "COSO Principle 8" },
+
+    // P9: Change Management (CC3.4)
+    { title: "CC3.4 - Change Management (Risk)", description: "The entity assesses changes that could impact the system of internal control.", category: "COSO Principle 9" },
+
+    // P10: Risk Mitigation (CC5.1)
+    { title: "CC5.1 - Risk Mitigation", description: "The entity selects control activities that mitigate risks to acceptable levels.", category: "COSO Principle 10" },
+
+    // P11: Tech Controls (CC5.2)
+    { title: "CC5.2 - Tech Controls", description: "The entity selects general control activities over technology.", category: "COSO Principle 11" },
+
+    // P12: Policies (CC5.3) + IT Expansion
+    { title: "CC5.3 - Policies", description: "The entity deploys control activities through policies and procedures.", category: "COSO Principle 12" },
+
+    // P13: Quality Info (CC2.1)
+    { title: "CC2.1 - Quality Information", description: "The entity uses relevant, quality information to support internal control.", category: "COSO Principle 13" },
+
+    // P14: Internal Comm (CC2.2)
+    { title: "CC2.2 - Internal Communication", description: "The entity communicates information internally (objectives/responsibilities).", category: "COSO Principle 14" },
+
+    // P15: External Comm (CC2.3)
+    { title: "CC2.3 - External Communication", description: "The entity communicates with external parties regarding internal control matters.", category: "COSO Principle 15" },
+
+    // P16: Ongoing Evals (CC4.1)
+    { title: "CC4.1 - Ongoing Evaluations", description: "The entity performs ongoing evaluations of internal control (Monitoring).", category: "COSO Principle 16" },
+
+    // P17: Deficiency Reporting (CC4.2)
+    { title: "CC4.2 - Deficiency Reporting", description: "The entity communicates deficiencies timely to those responsible.", category: "COSO Principle 17" },
+
+    // --- IT EXPANSION (Specific Criteria) ---
+    { title: "CC6.1 - Logical Access", description: "Logical Access: Restrict access to authorized users.", category: "Logical Access (CC6)" },
+    { title: "CC6.2 - Access Reviews", description: "Access Reviews: Regularly review user access rights.", category: "Logical Access (CC6)" },
+    { title: "CC6.6 - Physical Security", description: "Physical Security: Protect physical assets.", category: "Physical Security (CC6)" },
+    { title: "CC6.7 - Data Transmission", description: "Data Transmission: Restrict movement of data.", category: "Logical Access (CC6)" },
+
+    { title: "CC7.1 - System Operations", description: "System Ops: Monitor for configuration changes and vulnerabilities.", category: "System Operations (CC7)" },
+
+    { title: "CC8.1 - Change Management (DevOps)", description: "Change Mgmt: Authorize, test, and approve changes.", category: "Change Management (CC8)" },
+
+    { title: "CC9.2 - Vendor Risk", description: "Vendor Risk: Manage risks from business partners.", category: "Vendor Risk (CC9)" }
 ];
 
 export const HIPPA_CONTROLS = [
