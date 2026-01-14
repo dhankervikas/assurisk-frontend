@@ -207,7 +207,7 @@ const Dashboard = () => {
                     } catch (e) {
                         // CAPTURE THE VALIDATION ERROR
                         const details = e.response?.data ? JSON.stringify(e.response.data) : "No Details";
-                        addLog(`ERR ${e.response?.status}: ${details.substring(0, 50)}...`);
+                        addLog(`ERR ${e.response?.status}: ${details.substring(0, 500)}...`);
                     }
                 }
             }
