@@ -6,7 +6,7 @@ import {
     Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, Zap
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
-// import { AIService } from '../services/aiService'; // Unused
+import { AIService } from '../services/aiService';
 
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
@@ -212,6 +212,11 @@ const FrameworkDetail = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedPolicy, setGeneratedPolicy] = useState(null);
 
+    // NEW LOGIC: Get Specific Requirements (Moved up to avoid conditional hook error)
+    const [aiRequirements, setAiRequirements] = useState(null);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const [aiError, setAiError] = useState(false);
+
     useEffect(() => {
         fetchData();
     }, [id]);
@@ -361,11 +366,6 @@ const FrameworkDetail = () => {
     const isRequirementMet = (index, uploadedCount) => {
         return index < uploadedCount;
     };
-
-    // NEW LOGIC: Get Specific Requirements
-    const [aiRequirements, setAiRequirements] = useState(null);
-    const [loadingAi, setLoadingAi] = useState(false);
-    const [aiError, setAiError] = useState(false); // New Error State
 
     // FETCH AI SUGGESTIONS WHEN CONTROL OPENS
     useEffect(() => {
