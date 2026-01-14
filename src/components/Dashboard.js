@@ -317,19 +317,38 @@ const Dashboard = () => {
                     </h2>
 
                     {/* DIAGNOSTIC FOR EMPTY LIST */}
+                    {/* EMPTY STATE / INITIALIZATION PROMPT */}
                     {frameworks.length === 0 && !loading && (
-                        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl text-yellow-800 text-sm font-mono">
-                            <div className="mb-2">
-                                <strong>DEBUG: No Frameworks Found.</strong><br />
-                                API URL: {API_URL}<br />
-                                Total items in state: {frameworks.length}
+                        <div className="bg-white border border-blue-100 rounded-2xl p-12 text-center shadow-lg mb-8">
+                            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Shield className="w-10 h-10 text-blue-600" />
                             </div>
-                            <button
-                                onClick={handleSeed}
-                                className="px-3 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
-                            >
-                                <Shield className="w-4 h-4" /> REPAIR (v4 - DEBUG)
-                            </button>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to AssuRisk</h3>
+                            <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+                                It looks like your database is new. Let's initialize it with the default compliance frameworks (ISO 27001, SOC 2, HIPAA, etc.) to get you started.
+                            </p>
+
+                            <div className="flex flex-col items-center gap-4">
+                                <button
+                                    onClick={handleSeed}
+                                    className="px-8 py-4 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-blue-200 shadow-xl flex items-center gap-3 transform hover:scale-105"
+                                >
+                                    <Zap className="w-5 h-5 fill-current" />
+                                    Initialize Application Checklists
+                                </button>
+                                <p className="text-xs text-gray-400">
+                                    This will create ~150 controls across 5 frameworks.
+                                </p>
+                            </div>
+
+                            {/* LOG OUTPUT */}
+                            {seedLog.length > 0 && (
+                                <div className="mt-8 bg-gray-900 rounded-xl p-4 text-left font-mono text-xs text-green-400 h-64 overflow-y-auto w-full max-w-2xl mx-auto border border-gray-800 shadow-inner">
+                                    {seedLog.map((log, i) => (
+                                        <div key={i} className="mb-1 border-l-2 border-green-800 pl-2">{log}</div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
