@@ -552,6 +552,36 @@ const FrameworkDetail = () => {
                             <X className="w-5 h-5 text-gray-600" />
                         </button>
 
+// ... imports
+                        import {AIService} from '../services/aiService';
+
+                        // ... inside component
+                        const [isGenerating, setIsGenerating] = useState(false);
+                        const [generatedPolicy, setGeneratedPolicy] = useState(null);
+
+    // Reset when control changes
+    useEffect(() => {
+        if (selectedControl) {
+                            fetchEvidence(selectedControl.id);
+                        setGeneratedPolicy(null); // Reset AI draft
+        } else {
+                            setEvidenceList([]);
+        }
+    }, [selectedControl]);
+
+    const handleGeneratePolicy = async () => {
+                            setIsGenerating(true);
+                        try {
+            const policy = await AIService.generatePolicy(selectedControl.title, selectedControl.description);
+                        setGeneratedPolicy(policy);
+        } catch (err) {
+                            alert(err.message);
+        } finally {
+                            setIsGenerating(false);
+        }
+    };
+
+                        // ... in JSX, inside the Drawer, maybe after Description
                         <div className="p-8 pb-4 border-b border-gray-100">
                             <div className="flex gap-2 mb-2">
                                 <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded inline-block">
@@ -562,12 +592,40 @@ const FrameworkDetail = () => {
                                 </span>
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
-                            <p className="text-gray-500 text-sm">
+                            <p className="text-gray-500 text-sm mb-4">
                                 {COSO_DESCRIPTIONS[selectedControl.category] || selectedControl.description}
                             </p>
+
+                            {/* AI POLICY GENERATOR */}
+                            <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2">
+                                        <Shield className="w-4 h-4" /> AI Policy Drafter
+                                    </h3>
+                                    {!generatedPolicy && (
+                                        <button
+                                            onClick={handleGeneratePolicy}
+                                            disabled={isGenerating}
+                                            className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-md font-bold hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isGenerating ? "Drafting..." : "Auto-Generate Policy"}
+                                        </button>
+                                    )}
+                                </div>
+                                {generatedPolicy ? (
+                                    <div className="text-xs text-gray-700 whitespace-pre-wrap bg-white p-3 rounded border border-purple-100 max-h-60 overflow-y-auto">
+                                        {generatedPolicy}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-purple-700 italic">
+                                        Need a formal policy? Click generate to draft one instantly using AI.
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="p-8 space-y-8 flex-1">
+// ... rest of drawer
 
                             {/* STANDARD REQUIREMENTS SECTION */}
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
