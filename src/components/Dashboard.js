@@ -17,6 +17,11 @@ const Dashboard = () => {
     const [filterFramework, setFilterFramework] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [seedLog, setSeedLog] = useState([]); // Log state
+
+    // Helper to add logs to state
+    const addLog = (msg) => setSeedLog(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -68,14 +73,19 @@ const Dashboard = () => {
     };
 
     const handleSeed = async () => {
-        if (!window.confirm("WARNING: This will re-initialize the database with standard Frameworks and Controls. Any existing data might be duplicated. Continue?")) return;
+        if (!window.confirm("Start Database Repair? (Check Log Below)")) return;
+        setSeedLog(["Starting Repair Process..."]);
 
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
-            // 1. Define Frameworks
+            // 1. Fetch Existing
+            addLog("Fetching existing frameworks...");
+            const initialRes = await axios.get(`${API_URL}/frameworks/`, { headers });
+            addLog(`Found ${initialRes.data.length} existing frameworks.`);
+
             const seeds = [
                 { name: 'Health Insurance Portability and Accountability Act', code: 'HIPAA', description: 'United States legislation that provides data privacy and security provisions for safeguarding medical information.' },
                 { name: 'SOC 2 Type II', code: 'SOC2', description: 'Service Organization Control 2 - Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy.' },
@@ -84,25 +94,40 @@ const Dashboard = () => {
                 { name: 'GDPR Privacy', code: 'GDPR', description: 'General Data Protection Regulation for EU data privacy.' }
             ];
 
-            // 2. Create Frameworks and Capture IDs
-            const createdFws = [];
+            // 2. Create Missing OR Update Existing
             for (const fw of seeds) {
-                try {
-                    // Try to create
-                    const res = await axios.post(`${API_URL}/frameworks/`, fw, { headers });
-                    createdFws.push(res.data);
-                } catch (e) {
-                    console.warn(`Skipping ${fw.code} (might exist)`, e);
-                    // If failed, try to find it in current list to use its ID
-                    // This is a minimal fallback
+                const existing = initialRes.data.find(f => f.code === fw.code);
+
+                if (existing) {
+                    // Check if Upgrade Needed (Specifically for ISO 2013 -> 2022)
+                    if (fw.code === 'ISO27001' && existing.name.includes("2013")) {
+                        addLog(`UPGRADING ISO 2013 -> 2022 (ID: ${existing.id})...`);
+                        try {
+                            await axios.put(`${API_URL}/frameworks/${existing.id}`, fw, { headers });
+                            addLog("SUCCESS: ISO Framework Updated to 2022.");
+                        } catch (err) {
+                            addLog(`Update Failed: ${err.message}`);
+                        }
+                    } else {
+                        addLog(`${fw.code} exists and looks up to date.`);
+                    }
+                } else {
+                    // Create New
+                    try {
+                        addLog(`Creating New: ${fw.code}...`);
+                        await axios.post(`${API_URL}/frameworks/`, fw, { headers });
+                        addLog(`Created ${fw.code}`);
+                    } catch (e) {
+                        addLog(`Creation failed for ${fw.code}: ${e.message}`);
+                    }
                 }
             }
 
-            // Refetch to get ALL IDs (including existing ones)
+            // 3. Re-Fetch to get IDs
             const allFwRes = await axios.get(`${API_URL}/frameworks/`, { headers });
             const allFws = allFwRes.data;
 
-            // 3. Define Standard Controls for each Framework code
+            // 4. Create Controls
             const controlsMap = {
                 'HIPAA': [
                     { title: "164.308(a)(1)(i) - Security Management Process", description: "Implement policies and procedures to prevent, detect, contain, and correct security violations." },
@@ -118,7 +143,7 @@ const Dashboard = () => {
                     { title: "CC8.1 - Change Management", description: "The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures.", category: "CC8.1" }
                 ],
                 'ISO27001': [
-                    { title: "A.5.15 - Access Control", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established." },
+                    { title: "A.5.15 - Access Control (2022)", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established." },
                     { title: "A.8.2 - Privileged Access Rights", description: "The allocation and use of privileged access rights shall be restricted and managed." },
                     { title: "A.12.3 - Backup", description: "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy." },
                     { title: "A.14.2 - Secure Development Policy", description: "Rules for the development of software and systems shall be established and applied to developments within the organization." }
@@ -133,32 +158,37 @@ const Dashboard = () => {
                 ]
             };
 
-            // 4. Create Controls
-            const controlPromises = [];
-            for (const fw of allFws) {
-                const controlsToCreate = controlsMap[fw.code];
-                if (controlsToCreate) {
-                    controlsToCreate.forEach(c => {
+            let controlsAdded = 0;
+            for (const fw of allFws) { // Use allFws here
+                const controlsToCreate = controlsMap[fw.code] || [];
+                addLog(`Processing ${fw.code} (ID: ${fw.id})... Adding ${controlsToCreate.length} controls.`);
+
+                for (const c of controlsToCreate) {
+                    try {
                         const payload = {
                             framework_id: fw.id,
-                            control_id: c.title.split(' - ')[0], // Extract minimal ID
+                            control_id: c.title.split(' - ')[0],
                             title: c.title,
                             description: c.description,
                             category: c.category || "General",
-                            status: "NOT_STARTED" // Default
+                            status: "NOT_STARTED"
                         };
-                        controlPromises.push(axios.post(`${API_URL}/controls/`, payload, { headers }));
-                    });
+                        await axios.post(`${API_URL}/controls/`, payload, { headers });
+                        controlsAdded++;
+                    } catch (e) {
+                        // ignore duplicates
+                    }
                 }
             }
 
-            await Promise.allSettled(controlPromises);
-
-            alert("Database re-initialized with Frameworks and Controls! Reloading...");
-            window.location.reload();
+            addLog(`SUCCESS: Added ${controlsAdded} controls total.`);
+            alert(`Process Complete! Check log.`);
+            setLoading(false);
+            // Don't reload immediately
         } catch (err) {
             console.error("Seeding failed", err);
-            alert(`Seeding failed using API ${API_URL}`);
+            addLog(`CRITICAL FAILURE: ${err.message}`);
+            alert(`Failed: ${err.message}`);
             setLoading(false);
         }
     };
