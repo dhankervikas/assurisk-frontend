@@ -126,6 +126,16 @@ const Dashboard = () => {
             const allFwRes = await axios.get(`${API_URL}/frameworks/`, { headers });
             const allFws = allFwRes.data;
 
+            // 3.5 Fetch ALL Existing Controls to enable UPSERT (Update/Create)
+            addLog("Fetching existing controls map...");
+            const allControlsRes = await axios.get(`${API_URL}/controls/?limit=2000`, { headers });
+            const existingControlsMap = {}; // { fwId_controlId: dbId }
+            allControlsRes.data.forEach(c => {
+                const key = `${c.framework_id}_${c.control_id}`;
+                existingControlsMap[key] = c.id; // Map logical key to Database Primary Key
+            });
+            addLog(`Mapped ${Object.keys(existingControlsMap).length} existing controls.`);
+
             // 4. Create Controls
             const controlsMap = {
                 'HIPAA': HIPPA_CONTROLS,
@@ -138,31 +148,49 @@ const Dashboard = () => {
                 ]
             };
 
-
             let controlsAdded = 0;
+            let controlsUpdated = 0;
+
             for (const fw of allFws) {
                 const controlsToCreate = controlsMap[fw.code] || [];
-                addLog(`Processing ${fw.code} (ID: ${fw.id})... Adding ${controlsToCreate.length} controls.`);
+                addLog(`Processing ${fw.code}... Target: ${controlsToCreate.length} controls.`);
 
                 for (const c of controlsToCreate) {
+                    const controlId = c.title.split(' - ')[0];
+                    const payload = {
+                        framework_id: fw.id,
+                        control_id: controlId,
+                        title: c.title,
+                        description: c.description,
+                        category: c.category || "General",
+                        status: "not_started"
+                    };
+
+                    const lookupKey = `${fw.id}_${controlId}`;
+                    const existingDbId = existingControlsMap[lookupKey];
+
                     try {
-                        const payload = {
-                            framework_id: fw.id,
-                            control_id: c.title.split(' - ')[0],
-                            title: c.title,
-                            description: c.description,
-                            category: c.category || "General",
-                            status: "not_started"
-                        };
-                        await axios.post(`${API_URL}/controls/`, payload, { headers });
-                        controlsAdded++;
+                        if (existingDbId) {
+                            // UPDATE (PUT)
+                            await axios.put(`${API_URL}/controls/${existingDbId}`, payload, { headers });
+                            controlsUpdated++;
+                        } else {
+                            // CREATE (POST)
+                            await axios.post(`${API_URL}/controls/`, payload, { headers });
+                            controlsAdded++;
+                        }
                     } catch (e) {
-                        // CAPTURE THE VALIDATION ERROR
-                        const details = e.response?.data ? JSON.stringify(e.response.data) : "No Details";
-                        addLog(`ERR ${e.response?.status}: ${details.substring(0, 500)}...`);
+                        // Fallback: If PUT fails (e.g. 405), try DELETE then POST? 
+                        // Or just Log. Assuming PUT might be supported or we catch the error.
+                        const method = existingDbId ? "UPDATE" : "CREATE";
+                        const details = e.response?.data ? JSON.stringify(e.response.data) : e.message;
+                        // Only log critical failures, not 409s if we handled them
+                        addLog(`ERR [${method}] ${controlId}: ${e.response?.status}`);
                     }
                 }
             }
+
+            addLog(`DONE: Created ${controlsAdded}, Updated ${controlsUpdated}.`);
 
             addLog(`SUCCESS: Added ${controlsAdded} controls total.`);
             alert(`Process Complete! Check log.`);
