@@ -164,9 +164,8 @@ const Dashboard = () => {
                             title: c.title,
                             description: c.description,
                             category: c.category || "General",
-                            // Try omitting status if it's causing issues, or use "Pass" if that's what backend wants. 
-                            // But 422 usually means "Invalid Value". Let's stick to standard but log rich error.
-                            status: "NOT_STARTED"
+                            // Try 'PENDING' - common enum value matching IMPLEMENTED style
+                            status: "PENDING"
                         };
                         await axios.post(`${API_URL}/controls/`, payload, { headers });
                         controlsAdded++;
