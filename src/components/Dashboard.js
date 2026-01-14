@@ -156,7 +156,8 @@ const Dashboard = () => {
                 addLog(`Processing ${fw.code}... Target: ${controlsToCreate.length} controls.`);
 
                 for (const c of controlsToCreate) {
-                    const controlId = c.title.split(' - ')[0];
+                    // FIX: Use explicit control_id if available (ISO new format), else split Key
+                    const controlId = c.control_id || c.title.split(' - ')[0];
                     const payload = {
                         framework_id: fw.id,
                         control_id: controlId,
