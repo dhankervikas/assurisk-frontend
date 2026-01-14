@@ -217,6 +217,30 @@ const FrameworkDetail = () => {
     const [loadingAi, setLoadingAi] = useState(false);
     const [aiError, setAiError] = useState(false);
 
+    const fetchAiRequirements = async (control) => {
+        setLoadingAi(true);
+        setAiError(false);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_URL}/ai/suggest-evidence`, {
+                title: control.title,
+                description: control.description,
+                category: control.category
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data && res.data.requirements) {
+                setAiRequirements(res.data.requirements);
+            }
+        } catch (err) {
+            console.error("AI Fetch Failed", err);
+            setAiError(true); // Set error visible to user
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, [id]);
@@ -229,6 +253,15 @@ const FrameworkDetail = () => {
         } else {
             setEvidenceList([]);
             setGeneratedPolicy(null);
+        }
+    }, [selectedControl]);
+
+    // FETCH AI SUGGESTIONS WHEN CONTROL OPENS
+    useEffect(() => {
+        if (selectedControl) {
+            setAiRequirements(null);
+            setAiError(false);
+            fetchAiRequirements(selectedControl);
         }
     }, [selectedControl]);
 
@@ -367,38 +400,9 @@ const FrameworkDetail = () => {
         return index < uploadedCount;
     };
 
-    // FETCH AI SUGGESTIONS WHEN CONTROL OPENS
-    useEffect(() => {
-        if (selectedControl) {
-            setAiRequirements(null);
-            setAiError(false);
-            fetchAiRequirements(selectedControl);
-        }
-    }, [selectedControl]);
 
-    const fetchAiRequirements = async (control) => {
-        setLoadingAi(true);
-        setAiError(false);
-        try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`${API_URL}/ai/suggest-evidence`, {
-                title: control.title,
-                description: control.description,
-                category: control.category
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
 
-            if (res.data && res.data.requirements) {
-                setAiRequirements(res.data.requirements);
-            }
-        } catch (err) {
-            console.error("AI Fetch Failed", err);
-            setAiError(true); // Set error visible to user
-        } finally {
-            setLoadingAi(false);
-        }
-    };
+
 
     const getRequirements = (control) => {
         if (!control) return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
