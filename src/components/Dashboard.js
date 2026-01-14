@@ -13,6 +13,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const [frameworks, setFrameworks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null); // Add Error State
     const [filterFramework, setFilterFramework] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
 
