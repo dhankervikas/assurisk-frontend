@@ -227,6 +227,12 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="flex gap-2">
+                        <button
+                            onClick={handleSeed}
+                            className="px-3 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
+                        >
+                            <Shield className="w-4 h-4" /> Repair / Populate Data
+                        </button>
                         <button className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                             + Add Widget
                         </button>
