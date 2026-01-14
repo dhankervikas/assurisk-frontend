@@ -1,20 +1,26 @@
 
-
-// ============================================================================
-// UNIVERSAL INTENT LIBRARY (Source of Truth)
-// ============================================================================
-export const UNIVERSAL_INTENTS = [
-    { id: "INT-A5-15", text: "Access Control Pol: Access to information and other associated assets shall be limited to authorized users.", domain: "Access Control" },
-    { id: "INT-A5-16", text: "Identity Mgmt: The full lifecycle of identities shall be managed.", domain: "Access Control" },
-    { id: "INT-A5-17", text: "Auth Info: Allocation and management of authentication info shall be controlled.", domain: "Access Control" }
-];
+import {
+    Shield,
+    Users,
+    FileText,
+    Lock,
+    Server,
+    Database,
+    Globe,
+    AlertTriangle,
+    Eye,
+    Briefcase,
+    Activity,
+    CreditCard,
+    Layout
+} from 'lucide-react';
 
 // ============================================================================
 // ISO 27001:2022 - USER DEFINED MAPPING (EXACT) - ID SEPARATED
 // ============================================================================
 export const ISO_CONTROLS = [
-    { control_id: "INT-04-01", title: "4.1", description: "External issues relevant to the organizations purpose are determined", category: "Governance & Policy|Governance" },
-    { control_id: "INT-04-02", title: "4.1", description: "Internal issues relevant to the organizations purpose are determined", category: "Governance & Policy|Governance" },
+    { control_id: "INT-04-01", title: "4.1", description: "External issues relevant to the organization�s purpose are determined", category: "Governance & Policy|Governance" },
+    { control_id: "INT-04-02", title: "4.1", description: "Internal issues relevant to the organization�s purpose are determined", category: "Governance & Policy|Governance" },
     { control_id: "INT-04-03", title: "4.1", description: "External issues affecting the achievement of ISMS intended outcomes are determined", category: "Governance & Policy|Governance" },
     { control_id: "INT-04-04", title: "4.1", description: "Internal issues affecting the achievement of ISMS intended outcomes are determined", category: "Governance & Policy|Governance" },
     { control_id: "INT-04-05", title: "4.2", description: "Interested parties relevant to the information security management system are determined", category: "Governance & Policy|Governance" },
@@ -218,7 +224,7 @@ export const ISO_CONTROLS = [
     { control_id: "INT-A5-78", title: "A.5.14", description: "Encryption strength used for information transfer meets defined security requirements", category: "Governance & Policy|Technical" },
     { control_id: "INT-A5-79", title: "A.5.14", description: "Agreements governing secure information transfer with external parties exist", category: "Governance & Policy|Governance" },
     { control_id: "INT-A5-80", title: "A.5.14", description: "Information transfers are protected based on information classification", category: "Governance & Policy|Technical" },
-    { control_id: "INT-A5-15", title: "A.5.15", description: "An access control policy defining access requirements exists", category: "Access Control (IAM)|Governance" },
+    { control_id: "INT-A5-81", title: "A.5.15", description: "An access control policy defining access requirements exists", category: "Access Control (IAM)|Governance" },
     { control_id: "INT-A5-82", title: "A.5.15", description: "Access request approval and provisioning requirements are defined", category: "Access Control (IAM)|Governance" },
     { control_id: "INT-A5-83", title: "A.5.15", description: "Access provisioning follows role-based and least privilege principles", category: "Access Control (IAM)|Technical" },
     { control_id: "INT-A5-84", title: "A.5.15", description: "Management requirements for functional or non-human identities are defined", category: "Access Control (IAM)|Governance" },
@@ -771,7 +777,7 @@ export const SOC2_CONTROLS = [
     { title: "CC4.2 - Deficiency Reporting", description: "The entity communicates deficiencies timely to those responsible.", category: "COSO Principle 17" },
 
     // --- IT EXPANSION (Specific Criteria) ---
-    { control_id: "INT-A5-15", title: "CC6.1 - Logical Access", description: "Logical Access: Restrict access to authorized users.", category: "Logical Access (CC6)" },
+    { title: "CC6.1 - Logical Access", description: "Logical Access: Restrict access to authorized users.", category: "Logical Access (CC6)" },
     { title: "CC6.2 - Access Reviews", description: "Access Reviews: Regularly review user access rights.", category: "Logical Access (CC6)" },
     { title: "CC6.6 - Physical Security", description: "Physical Security: Protect physical assets.", category: "Physical Security (CC6)" },
     { title: "CC6.7 - Data Transmission", description: "Data Transmission: Restrict movement of data.", category: "Logical Access (CC6)" },

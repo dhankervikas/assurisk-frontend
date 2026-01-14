@@ -83,7 +83,12 @@ const Dashboard = () => {
     };
 
     const handleSeed = async () => {
-        if (!window.confirm("Start Database Repair? (Check Log Below)")) return;
+        // Removed confirm to ensure it runs
+        // if (!window.confirm("Start Database Repair? (Check Log Below)")) return;
+
+        // Define helper immediately so it can be used
+        const addLog = (msg) => setSeedLog(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
+
         setSeedLog(["Starting Repair Process..."]);
 
         try {
@@ -91,75 +96,101 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
-            // 1. Fetch Existing
-            addLog("Fetching existing frameworks...");
-            const initialRes = await axios.get(`${API_URL}/frameworks/`, { headers });
-            addLog(`Found ${initialRes.data.length} existing frameworks.`);
+            addLog("Starting Database Hard Reset...");
 
-            const seeds = [
-                { name: 'Health Insurance Portability and Accountability Act', code: 'HIPAA', description: 'United States legislation that provides data privacy and security provisions for safeguarding medical information.' },
-                { name: 'SOC 2 Type II', code: 'SOC2', description: 'Service Organization Control 2 - Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy.' },
-                { name: 'ISO 27001:2022', code: 'ISO27001-V2', description: 'International standard for information security management systems (ISMS).' },
-                { name: 'NIST CSF 2.0', code: 'NIST-CSF', description: 'National Institute of Standards and Technology Cybersecurity Framework.' },
-                { name: 'GDPR Privacy', code: 'GDPR', description: 'General Data Protection Regulation for EU data privacy.' }
+            // 1. Fetch Frameworks to get IDs
+
+            // 1. Fetch Frameworks to get IDs
+            // 0. Ensure Frameworks Exist
+            const DEFAULT_FRAMEWORKS = [
+                { name: "ISO 27001:2022", code: "ISO27001", description: "Information Security Management System" },
+                { name: "SOC 2 Type II", code: "SOC2", description: "Service Organization Control 2" },
+                { name: "HIPAA Security Rule", code: "HIPAA", description: "Health Insurance Portability and Accountability Act" },
+                { name: "GDPR", code: "GDPR", description: "General Data Protection Regulation" },
+                { name: "NIST CSF 2.0", code: "NIST-CSF", description: "National Institute of Standards and Technology" }
             ];
 
-            // 2. Create Missing (Skip Update/Delete since 405)
-            for (const fw of seeds) {
-                const existing = initialRes.data.find(f => f.code === fw.code);
+            // 1. Fetch Existing Frameworks
+            let frameworksRes = await axios.get(`${API_URL}/frameworks/`, { headers });
+            let allFws = frameworksRes.data;
+            const existingCodes = new Set(allFws.map(f => f.code));
 
-                if (existing) {
-                    addLog(`${fw.code} exists.`);
-                } else {
-                    // Create New
-                    try {
-                        addLog(`Creating New: ${fw.code}...`);
-                        await axios.post(`${API_URL}/frameworks/`, fw, { headers });
-                        addLog(`Created ${fw.code}`);
-                    } catch (e) {
-                        addLog(`Creation failed for ${fw.code}: ${e.message}`);
-                    }
+            // 2. Create Missing Frameworks
+            for (const fw of DEFAULT_FRAMEWORKS) {
+                if (!existingCodes.has(fw.code)) {
+                    addLog(`Creating Framework: ${fw.name}...`);
+                    await axios.post(`${API_URL}/frameworks/`, fw, { headers });
                 }
             }
 
             // 3. Re-Fetch to get IDs
-            const allFwRes = await axios.get(`${API_URL}/frameworks/`, { headers });
-            const allFws = allFwRes.data;
+            frameworksRes = await axios.get(`${API_URL}/frameworks/`, { headers });
+            allFws = frameworksRes.data;
+            const frameworkMap = {};
+            allFws.forEach(fw => { frameworkMap[fw.code] = fw.id; });
 
-            // 3.5 Fetch ALL Existing Controls to enable UPSERT (Update/Create)
-            addLog("Fetching existing controls map...");
-            const allControlsRes = await axios.get(`${API_URL}/controls/?limit=2000`, { headers });
-            const existingControlsMap = {}; // { fwId_controlId: dbId }
-            allControlsRes.data.forEach(c => {
-                const key = `${c.framework_id}_${c.control_id}`;
-                existingControlsMap[key] = c.id; // Map logical key to Database Primary Key
-            });
-            addLog(`Mapped ${Object.keys(existingControlsMap).length} existing controls.`);
-
-            // 4. Create Controls
+            // Define Data Source - ALIGNED WITH FRAMEWORK CODES
             const controlsMap = {
                 'HIPAA': HIPPA_CONTROLS,
                 'SOC2': SOC2_CONTROLS,
-                'ISO27001-V2': ISO_CONTROLS,
+                'ISO27001': ISO_CONTROLS, // Fixed Key
                 'NIST-CSF': NIST_CONTROLS,
-                'GDPR': GDPR_CONTROLS,
-                'ISO27001': [ // Fallback
-                    { title: "Legacy", description: "Please use ISO 27001:2022", category: "General" }
-                ]
+                'GDPR': GDPR_CONTROLS
             };
 
-            let controlsAdded = 0;
-            let controlsUpdated = 0;
+            // Helper for batch processing
+            const processBatch = async (items, batchSize, processFn) => {
+                for (let i = 0; i < items.length; i += batchSize) {
+                    const batch = items.slice(i, i + batchSize);
+                    await Promise.all(batch.map(processFn));
+                }
+            };
 
-            for (const fw of allFws) {
-                const controlsToCreate = controlsMap[fw.code] || [];
-                addLog(`Processing ${fw.code}... Target: ${controlsToCreate.length} controls.`);
+            for (const fwCode of Object.keys(controlsMap)) {
+                const fwId = frameworkMap[fwCode];
+                if (!fwId) {
+                    addLog(`Skipping ${fwCode} - Framework not found in DB.`);
+                    continue;
+                }
 
-                for (const c of controlsToCreate) {
-                    // FIX: Use explicit control_id if available (ISO new format), else split Key
-                    const controlId = c.control_id || c.title.split(' - ')[0];
+                const newControls = controlsMap[fwCode];
+                if (!newControls || newControls.length === 0) {
+                    addLog(`WARNING: No controls found for ${fwCode}`);
+                    continue;
+                }
+                addLog(`Loaded ${newControls.length} controls for ${fwCode}.`);
+
+                // A. FETCH EXISTING CONTROLS FOR THIS FRAMEWORK
+                // We need to fetch specific to framework to avoid fetching 3k+ items every time if we can
+                // But API is /controls/?limit=2000. Client side filter.
+                // Optimally we'd have /controls?framework_id=X but let's stick to what we know works: fetch all.
+                // Wait, fetching 2000 might miss some if we have 5 frameworks. 
+                // Let's assume the API supports filtering or we just fetch a lot.
+                const existingRes = await axios.get(`${API_URL}/controls/?limit=3000`, { headers });
+                const relevantControls = existingRes.data.filter(c => c.framework_id === fwId);
+
+                addLog(`Found ${relevantControls.length} existing controls for ${fwCode}. Deleting...`);
+
+                // B. DELETE ALL EXISTING (Batch: 10)
+                let deletedCount = 0;
+                await processBatch(relevantControls, 10, async (c) => {
+                    try {
+                        await axios.delete(`${API_URL}/controls/${c.id}`, { headers });
+                        deletedCount++;
+                    } catch (e) {
+                        console.error(`Failed to delete ${c.id}`, e);
+                    }
+                });
+                addLog(`Deleted ${deletedCount} controls.`);
+
+                // C. CREATE NEW CONTROLS (Batch: 10)
+                addLog(`Creating ${newControls.length} new controls...`);
+                let createdCount = 0;
+
+                await processBatch(newControls, 10, async (c) => {
+                    const controlId = c.control_id || c.title.substring(0, 15); // Fallback
                     const payload = {
-                        framework_id: fw.id,
+                        framework_id: fwId,
                         control_id: controlId,
                         title: c.title,
                         description: c.description,
@@ -167,40 +198,34 @@ const Dashboard = () => {
                         status: "not_started"
                     };
 
-                    const lookupKey = `${fw.id}_${controlId}`;
-                    const existingDbId = existingControlsMap[lookupKey];
-
                     try {
-                        if (existingDbId) {
-                            // UPDATE (PUT)
-                            await axios.put(`${API_URL}/controls/${existingDbId}`, payload, { headers });
-                            controlsUpdated++;
-                        } else {
-                            // CREATE (POST)
-                            await axios.post(`${API_URL}/controls/`, payload, { headers });
-                            controlsAdded++;
-                        }
+                        await axios.post(`${API_URL}/controls/`, payload, { headers });
+                        createdCount++;
                     } catch (e) {
-                        // Fallback: If PUT fails (e.g. 405), try DELETE then POST? 
-                        // Or just Log. Assuming PUT might be supported or we catch the error.
-                        const method = existingDbId ? "UPDATE" : "CREATE";
-                        const details = e.response?.data ? JSON.stringify(e.response.data) : e.message;
-                        // Only log critical failures, not 409s if we handled them
-                        addLog(`ERR [${method}] ${controlId}: ${e.response?.status}`);
+                        addLog(`ERR creating ${controlId}: ${e.message}`);
                     }
-                }
+                });
+
+                addLog(`Successfully created ${createdCount} controls for ${fwCode}.`);
             }
 
-            addLog(`DONE: Created ${controlsAdded}, Updated ${controlsUpdated}.`);
-
-            addLog(`SUCCESS: Added ${controlsAdded} controls total.`);
-            alert(`Process Complete! Check log.`);
+            addLog("Global Seed Complete.");
+            alert("Database repaired successfully!");
             setLoading(false);
-            // Don't reload immediately
+
+            // Optional: Refresh data
+            fetchData();
+
         } catch (err) {
             console.error("Seeding failed", err);
-            addLog(`CRITICAL FAILURE: ${err.message}`);
-            alert(`Failed: ${err.message}`);
+
+            if (err.response && err.response.status === 401) {
+                alert("Session Expired or Unauthorized. Please LOG OUT and LOG IN again to refresh your credentials.");
+                // navigate('/login'); // Optional: could force redirect
+            } else {
+                setSeedLog(prev => [...prev, `CRITICAL ERROR: ${err.message}`]);
+                alert(`Seeding Failed: ${err.message}`);
+            }
             setLoading(false);
         }
     };
@@ -305,7 +330,7 @@ const Dashboard = () => {
                                 onClick={handleSeed}
                                 className="px-3 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
                             >
-                                <Shield className="w-4 h-4" /> REPAIR DB (v3)
+                                <Shield className="w-4 h-4" /> REPAIR (v4 - DEBUG)
                             </button>
                         </div>
                     )}

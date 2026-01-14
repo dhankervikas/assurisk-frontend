@@ -36,7 +36,24 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
 
+    // Global 401 Interceptor
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.warn("[AuthContext] 401 Unauthorized detected. Logging out...");
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
     loadUser();
+
+    // Cleanup interceptor on unmount/token change
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
   }, [token]);
 
   const login = async (username, password) => {
@@ -55,18 +72,18 @@ export const AuthProvider = ({ children }) => {
       });
 
       console.log("[AuthContext] Login response received:", response);
-      
+
       const { access_token } = response.data;
       if (!access_token) {
-          console.error("[AuthContext] ERROR: No access_token in response data!", response.data);
-          throw new Error("No access token received");
+        console.error("[AuthContext] ERROR: No access_token in response data!", response.data);
+        throw new Error("No access token received");
       }
       console.log("[AuthContext] Token extracted.");
-      
+
       localStorage.setItem('token', access_token);
       setToken(access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
+
       // Fetch user data immediately after login
       console.log("[AuthContext] Fetching user profile (/me)...");
       const userResponse = await axios.get(`${API_BASE_URL}/api/v1/auth/me`, {
@@ -74,7 +91,7 @@ export const AuthProvider = ({ children }) => {
       });
       console.log("[AuthContext] User profile received:", userResponse.data);
       setUser(userResponse.data);
-      
+
       return { success: true };
     } catch (err) {
       console.error("[AuthContext] Login process failed:", err);

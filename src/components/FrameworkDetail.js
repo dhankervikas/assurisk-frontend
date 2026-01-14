@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    ArrowLeft, Search, CheckCircle, X, Shield, AlertCircle, Upload
+    ArrowLeft, Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, Zap
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
-import { AIService } from '../services/aiService';
+// import { AIService } from '../services/aiService'; // Unused
+
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
 
@@ -205,6 +206,7 @@ const FrameworkDetail = () => {
     // DRAWER STATE
     const [selectedControl, setSelectedControl] = useState(null);
     const [evidenceList, setEvidenceList] = useState([]);
+    const [expandedControlId, setExpandedControlId] = useState(null);
 
     // AI STATE
     const [isGenerating, setIsGenerating] = useState(false);
@@ -286,13 +288,16 @@ const FrameworkDetail = () => {
             const isISO = fwData.code && fwData.code.includes("ISO27001");
             const useGroupedView = isSOC2 || isISO;
 
-            const ctrlRes = await axios.get(`${API_URL}/controls/?limit=1000`, { headers });
+            const ctrlRes = await axios.get(`${API_URL}/controls/?limit=10000`, { headers });
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
             if (useGroupedView) {
                 const grouped = {};
                 allControls.forEach(c => {
-                    const key = c.category || "Uncategorized";
+                    // Compound Category Strategy: "Process Group|Display Category"
+                    // If pipe exists, split it. If not, use whole category.
+                    const parts = (c.category || "").split('|');
+                    const key = parts[0] || "Uncategorized"; // Use Process Group for section header
                     if (!grouped[key]) grouped[key] = [];
                     grouped[key].push(c);
                 });
@@ -358,8 +363,50 @@ const FrameworkDetail = () => {
     };
 
     // NEW LOGIC: Get Specific Requirements
+    const [aiRequirements, setAiRequirements] = useState(null);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const [aiError, setAiError] = useState(false); // New Error State
+
+    // FETCH AI SUGGESTIONS WHEN CONTROL OPENS
+    useEffect(() => {
+        if (selectedControl) {
+            setAiRequirements(null);
+            setAiError(false);
+            fetchAiRequirements(selectedControl);
+        }
+    }, [selectedControl]);
+
+    const fetchAiRequirements = async (control) => {
+        setLoadingAi(true);
+        setAiError(false);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_URL}/ai/suggest-evidence`, {
+                title: control.title,
+                description: control.description,
+                category: control.category
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data && res.data.requirements) {
+                setAiRequirements(res.data.requirements);
+            }
+        } catch (err) {
+            console.error("AI Fetch Failed", err);
+            setAiError(true); // Set error visible to user
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
     const getRequirements = (control) => {
         if (!control) return REQUIRED_EVIDENCE_DEFAULTS["DEFAULT"];
+
+        // 0. AI PRIORITY
+        if (aiRequirements) {
+            return aiRequirements;
+        }
 
         // 1. Try Specific Title Match (Exact)
         if (control.title && SPECIFIC_EVIDENCE_MAP[control.title]) {
@@ -506,48 +553,93 @@ const FrameworkDetail = () => {
                                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                         <table className="w-full">
                                             <thead>
-                                                <tr className="bg-gray-50 border-b border-gray-200 text-left">
-                                                    <th className="px-6 py-3 w-8"><input type="checkbox" className="rounded" /></th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Control</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Intent</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Evidence Status</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Standard Control</th>
-                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Owner</th>
+                                                <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b">
+                                                    <th className="px-6 py-3 w-12">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        />
+                                                    </th>
+                                                    <th className="px-6 py-3">Control</th>
+                                                    <th className="px-6 py-3 w-48">Evidence Status</th>
+                                                    <th className="px-6 py-3 w-32">Standard Control</th>
+                                                    <th className="px-6 py-3 w-24">Owner</th>
+                                                    <th className="px-6 py-3 w-32">Category</th>
+                                                    <th className="px-6 py-3 w-20"></th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
-                                                {controls.map(c => {
-                                                    const evStats = getEvidenceStats(c.control_id);
+                                            <tbody className="divide-y divide-gray-200">
+                                                {controls.sort((a, b) => {
+                                                    // Natural Sort (SAFE) - Defaults to empty string to prevent crashes
+                                                    const titleA = a.title || "";
+                                                    const titleB = b.title || "";
+                                                    return titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+                                                }).map(control => {
+                                                    const stats = getEvidenceStats(control.control_id); // Changed from c to control
+                                                    const evidenceStatus = stats.uploaded > 0
+                                                        ? (stats.uploaded >= stats.total ? "Met" : "Partial")
+                                                        : "Not Met";
+
                                                     return (
-                                                        <tr
-                                                            key={c.id}
-                                                            className="hover:bg-blue-50 transition-colors cursor-pointer group"
-                                                            onClick={() => setSelectedControl(c)}
-                                                        >
-                                                            <td className="px-6 py-4" onClick={e => e.stopPropagation()}><input type="checkbox" className="rounded" /></td>
-                                                            <td className="px-6 py-4 font-medium text-gray-900 group-hover:text-blue-700 align-top">
-                                                                {c.title.replace(new RegExp(`^${c.control_id} - `), '')}
-                                                            </td>
-                                                            <td className="px-6 py-4 text-sm text-gray-600 align-top">
-                                                                {c.description}
-                                                            </td>
-                                                            <td className="px-6 py-4 align-top">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="flex gap-0.5">
-                                                                        {[...Array(evStats.total)].map((_, i) => (
-                                                                            <div key={i} className={`w-2 h-4 rounded-sm ${i < evStats.uploaded ? 'bg-green-500' : 'bg-gray-200'}`}></div>
-                                                                        ))}
+                                                        <React.Fragment key={control.id}>
+                                                            <tr className={`hover:bg-gray-50 transition-colors ${expandedControlId === control.id ? 'bg-blue-50/50' : ''}`}>
+                                                                <td className="px-6 py-4">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="text-sm font-medium text-gray-900">
+                                                                        {control.description}
                                                                     </div>
-                                                                    <span className="text-xs font-medium text-gray-500 ml-1">
-                                                                        {evStats.uploaded}/{evStats.total}
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {/* Audit Status Logic */}
+                                                                        <div className="flex gap-1">
+                                                                            {Array.from({ length: 4 }).map((_, i) => ( // Mock bars
+                                                                                <div
+                                                                                    key={i}
+                                                                                    className={`h-3 w-1.5 rounded-full ${i < (stats.uploaded > 0 ? (stats.uploaded / stats.total) * 4 : 0) ? 'bg-green-500' : 'bg-gray-200'}`}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+                                                                        <span className="text-xs text-gray-500">
+                                                                            {stats.uploaded}/{stats.total}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex items-center">
+                                                                        <span className="text-sm text-gray-500 font-mono">
+                                                                            {control.title}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                                        System
                                                                     </span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono align-top text-center">
-                                                                {c.control_id}
-                                                            </td>
-                                                            <td className="px-6 py-4 text-sm text-gray-500 align-top">System</td>
-                                                        </tr>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        {(() => {
+                                                                            const parts = (control.category || "").split('|');
+                                                                            return parts[1] || parts[0] || "General";
+                                                                        })()}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-6 py-4 text-right">
+                                                                    <button
+                                                                        onClick={() => setExpandedControlId(expandedControlId === control.id ? null : control.id)}
+                                                                        className="text-gray-400 hover:text-blue-600 p-1"
+                                                                    >
+                                                                        {expandedControlId === control.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </React.Fragment>
                                                     );
                                                 })}
                                             </tbody>
@@ -627,13 +719,33 @@ const FrameworkDetail = () => {
 // ... rest of drawer
 
                             {/* STANDARD REQUIREMENTS SECTION */}
-                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
-                                <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                    <Shield className="w-5 h-5" /> Standard Requirements
+                            <div className={`border rounded-xl p-5 ${aiRequirements ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
+                                <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 ${aiRequirements ? 'text-purple-900' : 'text-blue-900'}`}>
+                                    {aiRequirements ? <Zap className="w-5 h-5 text-purple-600" /> : <Shield className="w-5 h-5" />}
+                                    {aiRequirements ? "AI-Suggested Requirements" : "Standard Requirements"}
                                 </h3>
 
                                 <div className="space-y-3">
-                                    {(() => {
+                                    {loadingAi && (
+                                        <div className="p-4 bg-blue-50 text-blue-600 rounded-lg flex items-center gap-2 animate-pulse">
+                                            <Shield className="w-5 h-5" />
+                                            <span className="text-sm font-semibold">Analyzing control requirements with AI...</span>
+                                        </div>
+                                    )}
+
+                                    {aiError && (
+                                        <div className="p-3 bg-red-50 text-red-600 rounded-lg flex items-center justify-between">
+                                            <span className="text-sm font-medium">AI Analysis Failed. showing defaults.</span>
+                                            <button
+                                                onClick={() => fetchAiRequirements(selectedControl)}
+                                                className="text-xs bg-white border border-red-200 px-3 py-1 rounded hover:bg-red-100 font-bold"
+                                            >
+                                                Retry
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {!loadingAi && (() => {
                                         const reqs = getRequirements(selectedControl);
                                         const stats = getEvidenceStats(selectedControl.control_id);
 
@@ -706,9 +818,9 @@ const FrameworkDetail = () => {
                         </div>
 
                         <div className="p-6 border-t border-gray-200 bg-gray-50">
-                            <button className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md">
-                                Mark Control as Complete
-                            </button>
+                            <div className="text-xs text-center text-gray-500 italic">
+                                Control status is automatically updated based on evidence uploads.
+                            </div>
                         </div>
                     </div>
                 </div>

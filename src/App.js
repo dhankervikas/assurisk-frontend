@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
 import FrameworkDetail from './components/FrameworkDetail';
+import ErrorBoundary from './components/ErrorBoundary'; // Import ErrorBoundary
 
 // --- PLACEHOLDER COMPONENT FOR NEW ROUTES ---
 const PlaceholderPage = ({ title }) => (
@@ -51,66 +52,68 @@ const ProtectedLayout = ({ children }) => {
 
 function App() {
     return (
-        <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
+        <ErrorBoundary>
+            <AuthProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
 
-                    {/* DASHBOARD */}
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <ProtectedLayout>
-                                    <Dashboard />
-                                </ProtectedLayout>
-                            </ProtectedRoute>
-                        }
-                    />
+                        {/* DASHBOARD */}
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <ProtectedRoute>
+                                    <ProtectedLayout>
+                                        <Dashboard />
+                                    </ProtectedLayout>
+                                </ProtectedRoute>
+                            }
+                        />
 
-                    {/* FRAMEWORKS DETAIL */}
-                    <Route
-                        path="/frameworks/:id"
-                        element={
-                            <ProtectedRoute>
-                                <ProtectedLayout>
-                                    <FrameworkDetail />
-                                </ProtectedLayout>
-                            </ProtectedRoute>
-                        }
-                    />
+                        {/* FRAMEWORKS DETAIL */}
+                        <Route
+                            path="/frameworks/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <ProtectedLayout>
+                                        <FrameworkDetail />
+                                    </ProtectedLayout>
+                                </ProtectedRoute>
+                            }
+                        />
 
-                    {/* --- NEW PREMIUM ROUTES --- */}
-                    {/* OVERVIEW */}
-                    <Route path="/controls" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Controls" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/monitors" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Monitors" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/get-started" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Get Started" /></ProtectedLayout></ProtectedRoute>} />
+                        {/* --- NEW PREMIUM ROUTES --- */}
+                        {/* OVERVIEW */}
+                        <Route path="/controls" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Controls" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/monitors" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Monitors" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/get-started" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Get Started" /></ProtectedLayout></ProtectedRoute>} />
 
-                    {/* DOCUMENTS */}
-                    <Route path="/documents" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Documents" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/policies" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Policies" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/risk" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Risk Management" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/vendors" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Vendors" /></ProtectedLayout></ProtectedRoute>} />
+                        {/* DOCUMENTS */}
+                        <Route path="/documents" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Documents" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/policies" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Policies" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/risk" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Risk Management" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/vendors" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Vendors" /></ProtectedLayout></ProtectedRoute>} />
 
-                    {/* REPORTS */}
-                    <Route path="/frameworks" element={<ProtectedRoute><ProtectedLayout><Dashboard /></ProtectedLayout></ProtectedRoute>} /> {/* List View -> Dashboard for now */}
-                    <Route path="/trust-report" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Trust Report" /></ProtectedLayout></ProtectedRoute>} />
+                        {/* REPORTS */}
+                        <Route path="/frameworks" element={<ProtectedRoute><ProtectedLayout><Dashboard /></ProtectedLayout></ProtectedRoute>} /> {/* List View -> Dashboard for now */}
+                        <Route path="/trust-report" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Trust Report" /></ProtectedLayout></ProtectedRoute>} />
 
-                    {/* MANAGE */}
-                    <Route path="/people" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="People" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/groups" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Groups" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/computers" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Computers" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/checklists" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Checklists" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/access" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Access" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/access-reviews" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Access Reviews" /></ProtectedLayout></ProtectedRoute>} />
-                    <Route path="/settings" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Settings" /></ProtectedLayout></ProtectedRoute>} />
+                        {/* MANAGE */}
+                        <Route path="/people" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="People" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/groups" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Groups" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/computers" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Computers" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/checklists" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Checklists" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/access" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Access" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/access-reviews" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Access Reviews" /></ProtectedLayout></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Settings" /></ProtectedLayout></ProtectedRoute>} />
 
-                    {/* FALLBACK */}
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-            </Router>
-        </AuthProvider>
+                        {/* FALLBACK */}
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    </Routes>
+                </Router>
+            </AuthProvider>
+        </ErrorBoundary>
     );
 }
 
