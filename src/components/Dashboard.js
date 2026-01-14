@@ -119,35 +119,91 @@ const Dashboard = () => {
             // 4. Create Controls
             const controlsMap = {
                 'HIPAA': [
-                    { title: "164.308(a)(1)(i) - Security Management Process", description: "Implement policies and procedures to prevent, detect, contain, and correct security violations." },
-                    { title: "164.308(a)(5)(ii)(B) - Protection from Malicious Software", description: "Procedures for guarding against, detecting, and reporting malicious software." },
-                    { title: "164.312(a)(1) - Access Control", description: "Implement technical policies and procedures for electronic information systems to maintain electronic protected health information." },
-                    { title: "164.310(a)(1) - Facility Access Controls", description: "Implement policies and procedures to limit physical access to electronic information systems and the facility or facilities in which they are housed." },
-                    { title: "164.312(a)(2)(IV) - Encryption and Decryption", description: "Implement a mechanism to encrypt and decrypt electronic protected health information." }
+                    { title: "164.308(a)(1) - Risk Analysis", description: "Conduct an accurate and thorough assessment of the potential risks and vulnerabilities to the confidentiality, integrity, and availability of electronic protected health information held by the covered entity.", category: "Administrative" },
+                    { title: "164.308(a)(3) - Workforce Security", description: "Implement procedures for the authorization and/or supervision of workforce members who work with electronic protected health information or in locations where it might be accessed.", category: "Administrative" },
+                    { title: "164.308(a)(4) - Information Access Management", description: "Implement policies and procedures for authorizing access to electronic protected health information.", category: "Administrative" },
+                    { title: "164.308(a)(5) - Security Awareness and Training", description: "Implement a security awareness and training program for all members of its workforce.", category: "Administrative" },
+                    { title: "164.310(a)(1) - Facility Access Controls", description: "Implement policies and procedures to limit physical access to its electronic information systems and the facility or facilities in which they are housed.", category: "Physical" },
+                    { title: "164.312(a)(1) - Access Control", description: "Implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights.", category: "Technical" },
+                    { title: "164.312(b) - Audit Controls", description: "Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use electronic protected health information.", category: "Technical" },
+                    { title: "164.312(d) - Person or Entity Authentication", description: "Implement procedures to verify that a person or entity seeking access to electronic protected health information is the one claimed.", category: "Technical" }
                 ],
                 'SOC2': [
-                    { title: "CC6.1 - Logical Access Security", description: "The entity implements logical access security software, infrastructure, and architectures over protected information assets to protect them from security events to meet the entity's objectives.", category: "CC6.1" },
-                    { title: "CC6.8 - Prevent Unauthorized Malicious Software", description: "The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software to meet the entity's objectives.", category: "CC6.8" },
-                    { title: "CC7.1 - System Configuration Monitor", description: "Information assets are monitored to identify changes to configurations that may result in the introduction of vulnerabilities.", category: "CC7.1" },
-                    { title: "CC8.1 - Change Management", description: "The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures.", category: "CC8.1" }
+                    // CC1: Control Environment
+                    { title: "CC1.1 - Integrity and Ethical Values", description: "The entity demonstrates a commitment to integrity and ethical values.", category: "CC1 - Control Environment" },
+                    { title: "CC1.4 - Competence", description: "The entity demonstrates a commitment to attract, develop, and retain competent individuals in alignment with objectives.", category: "CC1 - Control Environment" },
+
+                    // CC6: Logical Access
+                    { title: "CC6.1 - Logical Access Security", description: "The entity implements logical access security software, infrastructure, and architectures over protected information assets to protect them from security events to meet its objectives.", category: "CC6 - Logical and Physical Access Controls" },
+                    { title: "CC6.2 - User Identification", description: "Prior to issuing system credentials and granting system access, the entity registers and authorizes new internal and external users whose access is administered by the entity.", category: "CC6 - Logical and Physical Access Controls" },
+                    { title: "CC6.3 - Access Authorization", description: "The entity authorizes internal and external use of system resources prior to processing and on a periodic basis.", category: "CC6 - Logical and Physical Access Controls" },
+                    { title: "CC6.6 - Physical Access", description: "The entity restricts physical access to facilities and protected information assets to authorized personnel to meet its objectives.", category: "CC6 - Logical and Physical Access Controls" },
+                    { title: "CC6.7 - Transmission Protection", description: "The entity restricts the transmission, movement, and removal of information to authorized internal and external users and processes, and protects it during transmission, movement, or removal to meet its objectives.", category: "CC6 - Logical and Physical Access Controls" },
+
+                    // CC7: System Operations
+                    { title: "CC7.1 - Vulnerability Management", description: "The entity uses detection and monitoring procedures to identify (1) changes to configurations that result in the introduction of new vulnerabilities, and (2) susceptibilities to newly discovered vulnerabilities.", category: "CC7 - System Operations" },
+                    { title: "CC7.2 - Monitoring", description: "The entity monitors system components and the operation of those components for anomalies that are indicative of malicious acts, natural disasters, and errors affecting the entity's ability to meet its objectives.", category: "CC7 - System Operations" },
+
+                    // CC8: Change Management
+                    { title: "CC8.1 - Change Management", description: "The entity authorizes, designs, develops, or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures to meet its objectives.", category: "CC8 - Change Management" },
+
+                    // A1: Availability
+                    { title: "A1.1 - Processing Capacity", description: "The entity maintains, monitors, and evaluates current processing capacity and use of system components (infrastructure, data, and software) to manage capacity demand and to enable the implementation of additional capacity to help meet its objectives.", category: "Availability" },
+                    { title: "A1.2 - Backup and Recovery", description: "The entity authorizes, designs, develops, or acquires, configures, documents, tests, approves, and implements changes to recovery infrastructure, data, software, and procedures to meet its objectives.", category: "Availability" },
+
+                    // C1: Confidentiality
+                    { title: "C1.1 - Confidentiality Identification", description: "The entity identifies and maintains confidential information to meet the entity's objectives related to confidentiality.", category: "Confidentiality" }
                 ],
-                // Use V2 code for mapping
                 'ISO27001-V2': [
-                    { title: "A.5.15 - Access Control (2022)", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established." },
-                    { title: "A.8.2 - Privileged Access Rights", description: "The allocation and use of privileged access rights shall be restricted and managed." },
-                    { title: "A.12.3 - Backup", description: "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy." },
-                    { title: "A.14.2 - Secure Development Policy", description: "Rules for the development of software and systems shall be established and applied to developments within the organization." }
+                    // 5. Organizational Controls (Governance & Policy, HR, Asset, Access)
+                    { title: "A.5.1 - Policies for information security", description: "Information security policy and topic-specific policies shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel and relevant interested parties.", category: "Governance & Policy" },
+                    { title: "A.5.7 - Threat intelligence", description: "Information relating to information security threats shall be collected and analysed to produce threat intelligence.", category: "Threat Intel" },
+                    { title: "A.5.15 - Access control", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established.", category: "Access Control (IAM)" },
+                    { title: "A.5.17 - Authentication information", description: "Allocation and management of authentication information shall be controlled by a management process, including advising personnel on the appropriate handling of authentication information.", category: "Access Control (IAM)" },
+                    { title: "A.5.20 - Addressing information security within supplier agreements", description: "Relevant information security requirements shall be established and agreed with each supplier that may access, process, store, communicate, or provide IT infrastructure components for, the organization's information.", category: "Supplier Mgmt" },
+
+                    // 6. People Controls (HR Security)
+                    { title: "A.6.1 - Screening", description: "Background verification checks on all candidates for employment, contractors and other personnel shall be carried out in accordance with relevant laws, regulations and ethics and shall be proportional to the business requirements, the classification of the information to be accessed and the perceived risks.", category: "HR Security" },
+                    { title: "A.6.3 - Information security awareness, education and training", description: "Personnel of the organization and relevant interested parties shall receive appropriate info sec awareness, education and training.", category: "HR Security" },
+
+                    // 7. Physical Controls
+                    { title: "A.7.1 - Physical security perimeters", description: "Security perimeters shall be defined and used to protect areas that contain either sensitive or critical information and other associated assets.", category: "Physical Security" },
+                    { title: "A.7.4 - Physical security monitoring", description: "Premises shall be continuously monitored for un-authorised physical access.", category: "Physical Security" },
+
+                    // 8. Technological Controls (Ops, Assets, Crypto, Network)
+                    { title: "A.8.1 - User endpoint devices", description: "Information stored on, processed by or accessible via user endpoint devices shall be protected.", category: "Asset Management" },
+                    { title: "A.8.8 - Management of technical vulnerabilities", description: "Information about technical vulnerabilities of information systems being used shall be obtained, the organization's exposure to such vulnerabilities evaluated and appropriate measures taken.", category: "Vulnerability Management" },
+                    { title: "A.8.9 - Configuration management", description: "Configurations, including security configurations, of hardware, software, services and networks shall be established, documented, implemented, monitored and reviewed.", category: "Configuration Management" },
+                    { title: "A.8.10 - Information deletion", description: "Information stored in information systems, devices or in any other storage media shall be deleted when no longer required.", category: "Asset Management" },
+                    { title: "A.8.12 - Data leakage prevention", description: "Data leakage prevention measures shall be applied to systems, networks and any other devices that process, store or transmit sensitive information.", category: "Operations (General)" },
+                    { title: "A.8.13 - Information backup", description: "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy.", category: "Backup Management" },
+                    { title: "A.8.24 - Use of cryptography", description: "Rules for the effective use of cryptography, including cryptographic key management, shall be defined and implemented.", category: "Cryptography" },
+                    { title: "A.8.25 - Secure development life cycle", description: "Rules for the secure development of software and systems shall be established and applied.", category: "SDLC (Development)" }
                 ],
                 'ISO27001': [ // Fallback for old ISO if it exists
                     { title: "A.9.1.1 - Access Control (Legacy)", description: "Legacy control for 2013 standard." }
                 ],
                 'NIST-CSF': [
-                    { title: "ID.AM-1 - Inventory", description: "Physical devices and systems within the organization are inventoried." },
-                    { title: "PR.AC-1 - Access Control", description: "Access to assets and associated facilities is limited to authorized users, processes, or devices." }
+                    // Identify
+                    { title: "ID.AM-1 - Inventory", description: "Physical devices and systems within the organization are inventoried.", category: "Identify" },
+                    { title: "ID.AM-2 - Software Inventory", description: "Software platforms and applications within the organization are inventoried.", category: "Identify" },
+                    { title: "ID.RA-1 - Risk Vulnerabilities", description: "Asset vulnerabilities are identified and documented.", category: "Identify" },
+                    // Protect
+                    { title: "PR.AC-1 - Access Control", description: "Access to assets and associated facilities is limited to authorized users, processes, or devices.", category: "Protect" },
+                    { title: "PR.DS-1 - Data-at-Rest", description: "Data-at-rest is protected.", category: "Protect" },
+                    { title: "PR.DS-2 - Data-in-Transit", description: "Data-in-Transit is protected.", category: "Protect" },
+                    // Detect
+                    { title: "DE.AE-1 - Anomalies Monitoring", description: "A baseline of network operations and expected data flows for users and systems is established and managed.", category: "Detect" },
+                    // Respond
+                    { title: "RS.RP-1 - Response Plan", description: "Response plan is executed during or after an incident.", category: "Respond" }
                 ],
                 'GDPR': [
-                    { title: "Art. 32 - Security of Processing", description: "Implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk." },
-                    { title: "Art. 15 - Right of Access", description: "The data subject shall have the right to obtain from the controller confirmation as to whether or not personal data concerning him or her are being processed." }
+                    { title: "Art. 5 - Principles relating to processing", description: "Personal data shall be processed lawfully, fairly and in a transparent manner.", category: "Principles" },
+                    { title: "Art. 6 - Lawfulness of processing", description: "Processing shall be lawful only if and to the extent that at least one legal basis applies.", category: "Principles" },
+                    { title: "Art. 15 - Right of Access", description: "The data subject shall have the right to obtain from the controller confirmation as to whether or not personal data concerning him or her are being processed.", category: "Rights" },
+                    { title: "Art. 17 - Right to Erasure", description: "The data subject shall have the right to obtain from the controller the erasure of personal data concerning him or her without undue delay.", category: "Rights" },
+                    { title: "Art. 32 - Security of Processing", description: "Implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk.", category: "Security" },
+                    { title: "Art. 33 - Notification of Breach", description: "In the case of a personal data breach, the controller shall without undue delay notify the supervisory authority.", category: "Security" }
                 ]
             };
 
