@@ -506,52 +506,51 @@ const FrameworkDetail = () => {
                                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                         <table className="w-full">
                                             <thead>
-                                                <thead>
-                                                    <tr className="bg-gray-50 border-b border-gray-200 text-left">
-                                                        <th className="px-6 py-3 w-8"><input type="checkbox" className="rounded" /></th>
-                                                        <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Control</th>
-                                                        <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Intent</th>
-                                                        <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Evidence Status</th>
-                                                        <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Standard Control</th>
-                                                        <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Owner</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-100">
-                                                    {controls.map(c => {
-                                                        const evStats = getEvidenceStats(c.control_id);
-                                                        return (
-                                                            <tr
-                                                                key={c.id}
-                                                                className="hover:bg-blue-50 transition-colors cursor-pointer group"
-                                                                onClick={() => setSelectedControl(c)}
-                                                            >
-                                                                <td className="px-6 py-4" onClick={e => e.stopPropagation()}><input type="checkbox" className="rounded" /></td>
-                                                                <td className="px-6 py-4 font-medium text-gray-900 group-hover:text-blue-700 align-top">
-                                                                    {c.title.replace(new RegExp(`^${c.control_id} - `), '')}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-sm text-gray-600 align-top">
-                                                                    {c.description}
-                                                                </td>
-                                                                <td className="px-6 py-4 align-top">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="flex gap-0.5">
-                                                                            {[...Array(evStats.total)].map((_, i) => (
-                                                                                <div key={i} className={`w-2 h-4 rounded-sm ${i < evStats.uploaded ? 'bg-green-500' : 'bg-gray-200'}`}></div>
-                                                                            ))}
-                                                                        </div>
-                                                                        <span className="text-xs font-medium text-gray-500 ml-1">
-                                                                            {evStats.uploaded}/{evStats.total}
-                                                                        </span>
+                                                <tr className="bg-gray-50 border-b border-gray-200 text-left">
+                                                    <th className="px-6 py-3 w-8"><input type="checkbox" className="rounded" /></th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Control</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase w-1/3">Intent</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Evidence Status</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Standard Control</th>
+                                                    <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Owner</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {controls.map(c => {
+                                                    const evStats = getEvidenceStats(c.control_id);
+                                                    return (
+                                                        <tr
+                                                            key={c.id}
+                                                            className="hover:bg-blue-50 transition-colors cursor-pointer group"
+                                                            onClick={() => setSelectedControl(c)}
+                                                        >
+                                                            <td className="px-6 py-4" onClick={e => e.stopPropagation()}><input type="checkbox" className="rounded" /></td>
+                                                            <td className="px-6 py-4 font-medium text-gray-900 group-hover:text-blue-700 align-top">
+                                                                {c.title.replace(new RegExp(`^${c.control_id} - `), '')}
+                                                            </td>
+                                                            <td className="px-6 py-4 text-sm text-gray-600 align-top">
+                                                                {c.description}
+                                                            </td>
+                                                            <td className="px-6 py-4 align-top">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex gap-0.5">
+                                                                        {[...Array(evStats.total)].map((_, i) => (
+                                                                            <div key={i} className={`w-2 h-4 rounded-sm ${i < evStats.uploaded ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                                                                        ))}
                                                                     </div>
-                                                                </td>
-                                                                <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono align-top text-center">
-                                                                    {c.control_id}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-sm text-gray-500 align-top">System</td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
+                                                                    <span className="text-xs font-medium text-gray-500 ml-1">
+                                                                        {evStats.uploaded}/{evStats.total}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500 bg-gray-50 font-mono align-top text-center">
+                                                                {c.control_id}
+                                                            </td>
+                                                            <td className="px-6 py-4 text-sm text-gray-500 align-top">System</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
