@@ -258,7 +258,7 @@ const Dashboard = () => {
                             onClick={handleSeed}
                             className="px-3 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
                         >
-                            <Shield className="w-4 h-4" /> Repair / Populate Data
+                            <Shield className="w-4 h-4" /> REPAIR DB (v3)
                         </button>
                         <button className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                             + Add Widget
@@ -302,9 +302,9 @@ const Dashboard = () => {
                             </div>
                             <button
                                 onClick={handleSeed}
-                                className="px-4 py-2 bg-yellow-600 text-white font-bold rounded hover:bg-yellow-700 transition-colors shadow-sm"
+                                className="px-3 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
                             >
-                                🛠 Repair / Seed Database
+                                <Shield className="w-4 h-4" /> REPAIR DB (v3)
                             </button>
                         </div>
                     )}
