@@ -151,40 +151,6 @@ const Dashboard = () => {
                 ]
             };
 
-            // ---------------------------------------------------------
-            // AUTO-DETECT CORRECT STATUS (FUZZING)
-            // ---------------------------------------------------------
-            addLog("Probing backend for valid status enum...");
-            const possibleStatuses = ["PENDING", "Pending", "Not Started", "NOT_STARTED", "DRAFT", "Draft", "OPEN", "Open", "Proposed", "Active"];
-
-            let validStatus = null;
-            const probeFw = allFws[0]; // Use first available framework (usually HIPAA)
-            const probeControl = controlsMap[probeFw.code][0]; // First control (e.g. 164.308...)
-
-            for (const statusAttempt of possibleStatuses) {
-                try {
-                    const probePayload = {
-                        framework_id: probeFw.id,
-                        control_id: probeControl.title.split(' - ')[0],
-                        title: probeControl.title,
-                        description: probeControl.description,
-                        category: probeControl.category || "General",
-                        status: statusAttempt
-                    };
-                    await axios.post(`${API_URL}/controls/`, probePayload, { headers });
-                    validStatus = statusAttempt;
-                    addLog(`SUCCESS! Found valid status: "${validStatus}"`);
-                    break; // Stop looking
-                } catch (e) {
-                    // Silent fail on probe
-                }
-            }
-
-            if (!validStatus) {
-                addLog("CRITICAL: Could not guess valid status. Defaulting to 'PENDING' and hoping.");
-                validStatus = "PENDING";
-            }
-            // ---------------------------------------------------------
 
             let controlsAdded = 0;
             for (const fw of allFws) {
@@ -302,12 +268,6 @@ const Dashboard = () => {
 
             {/* MAIN CONTENT GRID (2 COLUMNS) */}
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-
-                {/* UPGRADE BANNER - TEMPORARY */}
-                <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">System Upgrade Required! </strong>
-                    <span className="block sm:inline">Please click the Red "Repair / Populate Data" button above to restore your framework data (ISO 2022).</span>
-                </div>
 
                 {/* SEED LOG - DEBUG OUTPUT */}
                 {seedLog.length > 0 && (
