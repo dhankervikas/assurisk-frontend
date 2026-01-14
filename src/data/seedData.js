@@ -77,7 +77,41 @@ export const SOC2_CONTROLS = [
 
 // ISO 27001 - MATCHED TO PROCESS GROUPS in FrameworkDetail.js
 export const ISO_CONTROLS = [
-    // Governance & Policy
+    // Governance & Policy (Clauses 4, 5, 6, 7)
+    { title: "4.1 - Understanding the organization", description: "The organization shall determine external and internal issues that are relevant to its purpose.", category: "Governance & Policy" },
+    { title: "4.2 - Understanding the needs of interested parties", description: "The organization shall determine interested parties and their requirements relevant to information security.", category: "Governance & Policy" },
+    { title: "4.3 - Scope of the ISMS", description: "The organization shall determine the boundaries and applicability of the information security management system.", category: "Governance & Policy" },
+    { title: "5.1 - Leadership and commitment", description: "Top management shall demonstrate leadership and commitment with respect to the ISMS.", category: "Governance & Policy" },
+    { title: "5.2 - Policy", description: "Top management shall establish an information security policy.", category: "Governance & Policy" },
+    { title: "5.3 - Organizational roles, responsibilities and authorities", description: "Top management shall ensure that the responsibilities and authorities for roles relevant to information security are assigned and communicated.", category: "Governance & Policy" },
+
+    // Risk Management (Clause 6, 8)
+    { title: "6.1 - Actions to address risks and opportunities", description: "When planning for the ISMS, the organization shall consider issues and requirements and determine the risks and opportunities.", category: "Risk Management" },
+    { title: "6.1.2 - Information security risk assessment", description: "The organization shall define and apply an information security risk assessment process.", category: "Risk Management" },
+    { title: "6.1.3 - Information security risk treatment", description: "The organization shall define and apply an information security risk treatment process.", category: "Risk Management" },
+    { title: "8.2 - Information security risk assessment", description: "The organization shall perform information security risk assessments at planned intervals.", category: "Risk Management" },
+    { title: "8.3 - Information security risk treatment", description: "The organization shall implement the information security risk treatment plan.", category: "Risk Management" },
+
+    // Support & HR (Clause 7)
+    { title: "7.1 - Resources", description: "The organization shall determine and provide the resources needed for the ISMS.", category: "Governance & Policy" },
+    { title: "7.2 - Competence", description: "The organization shall determine the necessary competence of person(s) doing work under its control.", category: "HR Security" },
+    { title: "7.3 - Awareness", description: "Persons doing work under the organization's control shall be aware of the information security policy.", category: "HR Security" },
+    { title: "7.4 - Communication", description: "The organization shall determine the need for internal and external communications relevant to the ISMS.", category: "Governance & Policy" },
+    { title: "7.5 - Documented information", description: "The ISMS shall include documented information required by ISO/IEC 27001.", category: "Governance & Policy" },
+
+    // Operations (Clause 8)
+    { title: "8.1 - Operational planning and control", description: "The organization shall plan, implement and control the processes needed to meet information security requirements.", category: "Operations (General)" },
+
+    // Performance Evaluation (Clause 9)
+    { title: "9.1 - Monitoring, measurement, analysis and evaluation", description: "The organization shall evaluate the information security performance and the effectiveness of the ISMS.", category: "Performance Evaluation" },
+    { title: "9.2 - Internal audit", description: "The organization shall conduct internal audits at planned intervals.", category: "Performance Evaluation" },
+    { title: "9.3 - Management review", description: "Top management shall review the organization's ISMS at planned intervals.", category: "Performance Evaluation" },
+
+    // Improvement (Clause 10)
+    { title: "10.1 - Nonconformity and corrective action", description: "When a nonconformity occurs, the organization shall react to the nonconformity and take action to control and correct it.", category: "Improvement" },
+    { title: "10.2 - Continual improvement", description: "The organization shall continually improve the suitability, adequacy and effectiveness of the ISMS.", category: "Improvement" },
+
+    // Annex A Controls (Existing)
     { title: "A.5.1 - Policies for information security", description: "Policies for information security and topic-specific policies shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel.", category: "Governance & Policy" },
     { title: "A.5.2 - Information security roles and responsibilities", description: "Information security roles and responsibilities shall be defined and allocated according to the organization needs.", category: "Governance & Policy" },
     { title: "A.5.3 - Segregation of duties", description: "Conflicting duties and conflicting areas of responsibility shall be segregated.", category: "Governance & Policy" },
