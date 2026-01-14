@@ -4,11 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
     Shield,
-    RotateCw,
     CheckCircle,
     AlertTriangle,
     FileText,
-    TrendingUp,
     Search,
     Filter,
     Activity,

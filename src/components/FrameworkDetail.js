@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    ArrowLeft, Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, Zap
+    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, Zap
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 // import { AIService } from '../services/aiService'; // Unused
