@@ -243,6 +243,12 @@ const Dashboard = () => {
             {/* MAIN CONTENT GRID (2 COLUMNS) */}
             <div className="flex flex-col lg:flex-row gap-8 items-start">
 
+                {/* UPGRADE BANNER - TEMPORARY */}
+                <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">System Upgrade Required! </strong>
+                    <span className="block sm:inline">Please click the Red "Repair / Populate Data" button above to restore your framework data (ISO 2022).</span>
+                </div>
+
                 {/* LEFT COLUMN: FRAMEWORKS (Expands to fill) */}
                 <div className="flex-1 w-full space-y-6">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
