@@ -6,6 +6,7 @@ import {
     ArrowLeft, Search, CheckCircle, X, Shield, AlertCircle, Upload
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
+import { AIService } from '../services/aiService';
 
 const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
 
@@ -203,20 +204,38 @@ const FrameworkDetail = () => {
 
     // DRAWER STATE
     const [selectedControl, setSelectedControl] = useState(null);
-    const [evidenceList, setEvidenceList] = useState([]); // NEW: Store evidence list
+    const [evidenceList, setEvidenceList] = useState([]);
+
+    // AI STATE
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedPolicy, setGeneratedPolicy] = useState(null);
 
     useEffect(() => {
         fetchData();
     }, [id]);
 
-    // FETCH EVIDENCE WHEN CONTROL IS SELECTED
+    // FETCH EVIDENCE & RESET AI WHEN CONTROL IS SELECTED
     useEffect(() => {
         if (selectedControl) {
             fetchEvidence(selectedControl.id);
+            setGeneratedPolicy(null); // Reset AI draft
         } else {
             setEvidenceList([]);
+            setGeneratedPolicy(null);
         }
     }, [selectedControl]);
+
+    const handleGeneratePolicy = async () => {
+        setIsGenerating(true);
+        try {
+            const policy = await AIService.generatePolicy(selectedControl.title, selectedControl.description);
+            setGeneratedPolicy(policy);
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const fetchEvidence = async (controlId) => {
         try {
@@ -553,33 +572,7 @@ const FrameworkDetail = () => {
                         </button>
 
 // ... imports
-                        import {AIService} from '../services/aiService';
 
-                        // ... inside component
-                        const [isGenerating, setIsGenerating] = useState(false);
-                        const [generatedPolicy, setGeneratedPolicy] = useState(null);
-
-    // Reset when control changes
-    useEffect(() => {
-        if (selectedControl) {
-                            fetchEvidence(selectedControl.id);
-                        setGeneratedPolicy(null); // Reset AI draft
-        } else {
-                            setEvidenceList([]);
-        }
-    }, [selectedControl]);
-
-    const handleGeneratePolicy = async () => {
-                            setIsGenerating(true);
-                        try {
-            const policy = await AIService.generatePolicy(selectedControl.title, selectedControl.description);
-                        setGeneratedPolicy(policy);
-        } catch (err) {
-                            alert(err.message);
-        } finally {
-                            setIsGenerating(false);
-        }
-    };
 
                         // ... in JSX, inside the Drawer, maybe after Description
                         <div className="p-8 pb-4 border-b border-gray-100">
