@@ -89,32 +89,17 @@ const Dashboard = () => {
             const seeds = [
                 { name: 'Health Insurance Portability and Accountability Act', code: 'HIPAA', description: 'United States legislation that provides data privacy and security provisions for safeguarding medical information.' },
                 { name: 'SOC 2 Type II', code: 'SOC2', description: 'Service Organization Control 2 - Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy.' },
-                { name: 'ISO 27001:2022', code: 'ISO27001', description: 'International standard for information security management systems (ISMS).' },
+                { name: 'ISO 27001:2022', code: 'ISO27001-V2', description: 'International standard for information security management systems (ISMS).' },
                 { name: 'NIST CSF 2.0', code: 'NIST-CSF', description: 'National Institute of Standards and Technology Cybersecurity Framework.' },
                 { name: 'GDPR Privacy', code: 'GDPR', description: 'General Data Protection Regulation for EU data privacy.' }
             ];
 
-            // 2. Create Missing OR Update Existing
+            // 2. Create Missing (Skip Update/Delete since 405)
             for (const fw of seeds) {
                 const existing = initialRes.data.find(f => f.code === fw.code);
 
                 if (existing) {
-                    // Check if Upgrade Needed (Specifically for ISO 2013 -> 2022)
-                    if (fw.code === 'ISO27001' && existing.name.includes("2013")) {
-                        addLog(`UPGRADING ISO 2013 -> 2022 via RE-CREATION (ID: ${existing.id})...`);
-                        try {
-                            // DELETE OLD
-                            await axios.delete(`${API_URL}/frameworks/${existing.id}`, { headers });
-                            addLog("Deleted old ISO 2013.");
-                            // CREATE NEW
-                            await axios.post(`${API_URL}/frameworks/`, fw, { headers });
-                            addLog("Created new ISO 2022.");
-                        } catch (err) {
-                            addLog(`Upgrade Failed: ${err.message} (${err.response?.status})`);
-                        }
-                    } else {
-                        addLog(`${fw.code} exists and looks up to date.`);
-                    }
+                    addLog(`${fw.code} exists.`);
                 } else {
                     // Create New
                     try {
@@ -146,11 +131,15 @@ const Dashboard = () => {
                     { title: "CC7.1 - System Configuration Monitor", description: "Information assets are monitored to identify changes to configurations that may result in the introduction of vulnerabilities.", category: "CC7.1" },
                     { title: "CC8.1 - Change Management", description: "The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures.", category: "CC8.1" }
                 ],
-                'ISO27001': [
+                // Use V2 code for mapping
+                'ISO27001-V2': [
                     { title: "A.5.15 - Access Control (2022)", description: "Rules to control physical and logical access to information and information processing facilities shall be firmly established." },
                     { title: "A.8.2 - Privileged Access Rights", description: "The allocation and use of privileged access rights shall be restricted and managed." },
                     { title: "A.12.3 - Backup", description: "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy." },
                     { title: "A.14.2 - Secure Development Policy", description: "Rules for the development of software and systems shall be established and applied to developments within the organization." }
+                ],
+                'ISO27001': [ // Fallback for old ISO if it exists
+                    { title: "A.9.1.1 - Access Control (Legacy)", description: "Legacy control for 2013 standard." }
                 ],
                 'NIST-CSF': [
                     { title: "ID.AM-1 - Inventory", description: "Physical devices and systems within the organization are inventoried." },
@@ -175,13 +164,16 @@ const Dashboard = () => {
                             title: c.title,
                             description: c.description,
                             category: c.category || "General",
+                            // Try omitting status if it's causing issues, or use "Pass" if that's what backend wants. 
+                            // But 422 usually means "Invalid Value". Let's stick to standard but log rich error.
                             status: "NOT_STARTED"
                         };
                         await axios.post(`${API_URL}/controls/`, payload, { headers });
                         controlsAdded++;
                     } catch (e) {
-                        // LOG ERROR instead of swallowing
-                        addLog(`ERR on ${c.title.substring(0, 10)}: ${e.response?.status || e.message}`);
+                        // CAPTURE THE VALIDATION ERROR
+                        const details = e.response?.data ? JSON.stringify(e.response.data) : "No Details";
+                        addLog(`ERR ${e.response?.status}: ${details.substring(0, 50)}...`);
                     }
                 }
             }
