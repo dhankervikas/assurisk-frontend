@@ -292,12 +292,15 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <button
-                            onClick={handleSeed}
-                            className="px-3 py-2 text-sm font-bold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors shadow-sm flex items-center gap-2"
-                        >
-                            <Shield className="w-4 h-4" /> Repair Data
-                        </button>
+                        {/* Only show Repair Data on Localhost */}
+                        {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+                            <button
+                                onClick={handleSeed}
+                                className="px-3 py-2 text-sm font-bold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors shadow-sm flex items-center gap-2"
+                            >
+                                <Shield className="w-4 h-4" /> Repair Data
+                            </button>
+                        )}
                         <button className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                             + Add Widget
                         </button>
