@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Hardcoded for Production to fix popup issue
-const API_BASE_URL = 'https://assurisk-backend.onrender.com/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,

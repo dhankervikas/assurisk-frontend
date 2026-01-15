@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { ISO_CONTROLS, SOC2_CONTROLS, HIPPA_CONTROLS, NIST_CONTROLS, GDPR_CONTROLS } from '../data/seedData';
 
-const API_URL = 'https://assurisk-backend.onrender.com/api/v1';
+const API_URL = 'http://localhost:8000/api/v1';
 
 const Dashboard = () => {
     const navigate = useNavigate();

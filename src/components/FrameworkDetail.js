@@ -3,13 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, Zap, Activity
+    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, Zap, Activity, FileText
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 import { AIService } from '../services/aiService';
 
+// ... (existing code)
 
-const API_URL = "https://assurisk-backend.onrender.com/api/v1";
+// For local development, use localhost. For prod, use Render.
+// Ideally usage: const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+const API_URL = 'http://localhost:8000/api/v1';
 
 // COSO DESCRIPTIONS MAP
 const COSO_DESCRIPTIONS = {
@@ -218,46 +221,23 @@ const FrameworkDetail = () => {
 
     // DRAWER STATE
     const [selectedControl, setSelectedControl] = useState(null);
-    const [evidenceList, setEvidenceList] = useState([]);
+    const [evidenceList, setEvidenceList] = useState(null);
     const [expandedControlId, setExpandedControlId] = useState(null);
     const [expandedReq, setExpandedReq] = useState(null);
 
-    // AI STATE
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedPolicy, setGeneratedPolicy] = useState(null);
-
-    // NEW LOGIC: Get Specific Requirements (Moved up to avoid conditional hook error)
+    // AI State
     const [aiRequirements, setAiRequirements] = useState(null);
+    const [aiExplanation, setAiExplanation] = useState("");
     const [loadingAi, setLoadingAi] = useState(false);
     const [aiError, setAiError] = useState(false);
+    const [generatedPolicy, setGeneratedPolicy] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // GAP ANALYSIS STATE
     const [gapAnalysis, setGapAnalysis] = useState(null);
     const [analyzingGap, setAnalyzingGap] = useState(false);
 
-    const fetchAiRequirements = async (control) => {
-        setLoadingAi(true);
-        setAiError(false);
-        try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`${API_URL}/ai/suggest-evidence`, {
-                title: control.title,
-                description: control.description,
-                category: control.category
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
 
-            if (res.data && res.data.requirements) {
-                setAiRequirements(res.data.requirements);
-            }
-        } catch (err) {
-            console.error("AI Fetch Failed", err);
-            setAiError(true); // Set error visible to user
-        } finally {
-            setLoadingAi(false);
-        }
-    };
 
     const handleGapAnalysis = async () => {
         if (!selectedControl) return;
@@ -276,6 +256,29 @@ const FrameworkDetail = () => {
             console.error(e);
         } finally {
             setAnalyzingGap(false);
+        }
+    };
+
+    const handleGenerateArtifact = async (requirement) => {
+        setIsGenerating(true);
+        // Use Policy Generator Logic but for Artifacts
+        // Reuse generatedPolicy state for now to show in the "AI Policy Drafter" box
+        // Ideally we should have a modal, but let's reuse the existing UI box for speed.
+        try {
+            const draft = await AIService.generateArtifact(
+                selectedControl.title,
+                requirement.name,
+                requirement.desc
+            );
+            setGeneratedPolicy(draft); // Reuse this state to display result in drawer
+            // Scroll to top of drawer
+            const drawer = document.querySelector('.animate-slide-in-right');
+            if (drawer) drawer.scrollTop = 0;
+        } catch (e) {
+            console.error(e);
+            alert("Failed to generate artifact.");
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -303,6 +306,24 @@ const FrameworkDetail = () => {
         }
     }, [selectedControl]);
 
+    const fetchAiRequirements = async (control) => {
+        setLoadingAi(true);
+        setAiError(false);
+        try {
+            const data = await AIService.analyzeControlRequirements(control.title, control.description, control.category, control.id);
+            console.log("AI Data:", data);
+            if (data && data.requirements) {
+                setAiRequirements(data.requirements);
+                setAiExplanation(data.explanation || "");
+            }
+        } catch (err) {
+            console.error(err);
+            setAiError(true);
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
     const handleGeneratePolicy = async () => {
         setIsGenerating(true);
         try {
@@ -322,6 +343,18 @@ const FrameworkDetail = () => {
             setEvidenceList(res.data);
         } catch (e) {
             console.error("Failed to load evidence", e);
+        }
+    };
+
+    const handleReviewDocument = async (evidence) => {
+        try {
+            alert(`Reviewing ${evidence.filename}... This may take a few seconds.`);
+            const result = await AIService.reviewDocument(selectedControl.id, evidence.id);
+            console.log("Review Result:", result);
+            alert(`AI Verdict: ${result.status}\n\nReasoning: ${result.reasoning}`);
+            fetchEvidence(selectedControl.id);
+        } catch (error) {
+            alert("Review Failed: " + error.message);
         }
     };
 
@@ -589,27 +622,30 @@ const FrameworkDetail = () => {
                     {useGroupedView ? (
                         Object.keys(socControls).sort((a, b) => {
                             // ISO 27001 Custom Sort Order
+                            // ISO 27001 Custom Sort Order
                             const ISO_ORDER = [
-                                "Clause 4: Context of the organization",
-                                "Clause 5: Leadership",
-                                "Clause 6: Planning",
-                                "Clause 7: Support",
-                                "Clause 8: Operation",
-                                "Clause 9: Performance evaluation",
-                                "Clause 10: Improvement",
-                                "Organizational controls",
-                                "People controls",
-                                "Physical controls",
-                                "Technological controls",
-                                // Legacy mappings fallback
-                                "Governance & Policy",
-                                "Risk Management",
-                                "Performance Evaluation",
-                                "Improvement",
-                                "Operations (General)",
+                                "Governance",
+                                "HR Security",
+                                "Asset Management",
+                                "Access Control (IAM)",
+                                "Physical Security",
+                                "Operations",
+                                "Configuration Management",
+                                "Cryptography",
+                                "Logging & Monitoring",
+                                "Clock Synchronization",
+                                "Vulnerability Management",
+                                "Capacity Management",
+                                "Backup Management",
+                                "Network Security",
+                                "SDLC (Development)",
                                 "Supplier Mgmt",
                                 "Incident & Resilience",
-                                "Legal & Compliance"
+                                "Threat Intel",
+                                "Legal & Compliance",
+                                "Risk Management",
+                                "Performance Evaluation",
+                                "Improvement"
                             ];
 
                             const idxA = ISO_ORDER.indexOf(a);
@@ -620,7 +656,30 @@ const FrameworkDetail = () => {
                             if (idxB !== -1) return 1;
                             return a.localeCompare(b);
                         }).map(category => {
-                            const controls = getFilteredControls(socControls[category]);
+                            // Create copy with slice() before sorting to avoid mutation errors
+                            const controls = getFilteredControls(socControls[category]).slice().sort((a, b) => {
+                                const idA = (a.control_id || "").trim();
+                                const idB = (b.control_id || "").trim();
+
+                                // Weight: Clauses (4-10) = 1, Annex A = 2
+                                const typeA = idA.startsWith("A") || idA.startsWith("a") ? 2 : 1;
+                                const typeB = idB.startsWith("A") || idB.startsWith("a") ? 2 : 1;
+
+                                if (typeA !== typeB) return typeA - typeB;
+
+                                // Both are same type. Semantic sort.
+                                // Strip non-numeric prefix
+                                const partsA = idA.replace(/^[A-Za-z]+\./, '').split('.').map(x => parseInt(x, 10));
+                                const partsB = idB.replace(/^[A-Za-z]+\./, '').split('.').map(x => parseInt(x, 10));
+
+                                const len = Math.max(partsA.length, partsB.length);
+                                for (let i = 0; i < len; i++) {
+                                    const valA = partsA[i] !== undefined ? partsA[i] : 0;
+                                    const valB = partsB[i] !== undefined ? partsB[i] : 0;
+                                    if (valA !== valB) return valA - valB;
+                                }
+                                return 0;
+                            });
                             if (controls.length === 0) return null;
                             const cosoText = COSO_DESCRIPTIONS[category] || COSO_DESCRIPTIONS["DEFAULT"];
 
@@ -628,9 +687,6 @@ const FrameworkDetail = () => {
                                 <div key={category} className="mb-8">
                                     <div className="mb-4">
                                         <h2 className="text-xl font-bold text-gray-900">{category}</h2>
-                                        <p className="text-gray-600 font-medium text-sm mt-1 border-l-4 border-blue-500 pl-3">
-                                            {cosoText}
-                                        </p>
                                     </div>
                                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                         <table className="w-full">
@@ -651,12 +707,7 @@ const FrameworkDetail = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-200">
-                                                {controls.sort((a, b) => {
-                                                    // Natural Sort (SAFE) - Defaults to empty string to prevent crashes
-                                                    const titleA = a.title || "";
-                                                    const titleB = b.title || "";
-                                                    return titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
-                                                }).map(control => {
+                                                {controls.map(control => {
                                                     const stats = getEvidenceStats(control.control_id); // Changed from c to control
                                                     const evidenceStatus = stats.uploaded > 0
                                                         ? (stats.uploaded >= stats.total ? "Met" : "Partial")
@@ -698,7 +749,7 @@ const FrameworkDetail = () => {
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex items-center">
                                                                         <span className="text-sm text-gray-500 font-mono">
-                                                                            {control.title}
+                                                                            {control.control_id}
                                                                         </span>
                                                                     </div>
                                                                 </td>
@@ -708,7 +759,10 @@ const FrameworkDetail = () => {
                                                                     </span>
                                                                 </td>
                                                                 <td className="px-6 py-4">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${control.classification === 'AUTO' ? 'bg-purple-100 text-purple-800 border-purple-200' : control.classification === 'HYBRID' ? 'bg-orange-100 text-orange-800 border-orange-200' : 'bg-blue-100 text-blue-800 border-blue-200'}`}>
+                                                                        {control.classification || "MANUAL"}
+                                                                    </span>
+                                                                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                                         {(() => {
                                                                             const parts = (control.category || "").split('|');
                                                                             return parts[1] || parts[0] || "General";
@@ -766,6 +820,9 @@ const FrameworkDetail = () => {
                                 <span className="text-xs font-bold text-gray-500 px-2 py-1 bg-gray-100 rounded inline-block font-mono">
                                     {selectedControl.control_id}
                                 </span>
+                                <span className={`text-xs font-bold px-2 py-1 rounded inline-block border ${selectedControl.classification === 'AUTO' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                                    {selectedControl.classification || "MANUAL"}
+                                </span>
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
                             <p className="text-gray-500 text-sm mb-4">
@@ -801,7 +858,7 @@ const FrameworkDetail = () => {
                         </div>
 
                         <div className="p-8 space-y-8 flex-1">
-// ... rest of drawer
+
 
                             {/* STANDARD REQUIREMENTS SECTION */}
                             <div className={`border rounded-xl p-5 ${aiRequirements ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
@@ -811,6 +868,13 @@ const FrameworkDetail = () => {
                                 </h3>
 
                                 <div className="space-y-3">
+                                    {aiExplanation && (
+                                        <div className="mb-4 text-sm text-gray-700 bg-white p-3 rounded-lg border border-purple-100 shadow-sm leading-relaxed">
+                                            <span className="font-bold text-purple-800">Clause Requirement: </span>
+                                            {typeof aiExplanation === 'object' ? JSON.stringify(aiExplanation) : aiExplanation}
+                                        </div>
+                                    )}
+
                                     {loadingAi && (
                                         <div className="p-4 bg-blue-50 text-blue-600 rounded-lg flex items-center gap-2 animate-pulse">
                                             <Shield className="w-5 h-5" />
@@ -845,6 +909,7 @@ const FrameworkDetail = () => {
                                                             <th className="p-3 w-1/12">Owner</th>
                                                             <th className="p-3 w-1/12">Status</th>
                                                             <th className="p-3 w-1/6">Last Update</th>
+                                                            <th className="p-3 w-1/12 text-center">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-gray-100">
@@ -892,6 +957,28 @@ const FrameworkDetail = () => {
                                                                         </td>
                                                                         <td className="p-3 text-xs text-gray-400">
                                                                             {new Date().toLocaleDateString()}
+                                                                        </td>
+                                                                        <td className="p-3 text-right flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                                            <input
+                                                                                type="file"
+                                                                                id={`file-upload-req-${idx}`}
+                                                                                className="hidden"
+                                                                                onChange={(e) => handleFileUpload(e, selectedControl.id)}
+                                                                            />
+                                                                            <button
+                                                                                onClick={() => document.getElementById(`file-upload-req-${idx}`).click()}
+                                                                                title="Upload Evidence"
+                                                                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                                            >
+                                                                                <Upload className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => handleGenerateArtifact(req)}
+                                                                                title="Auto-Generate Draft"
+                                                                                className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded"
+                                                                            >
+                                                                                <Zap className="w-4 h-4" />
+                                                                            </button>
                                                                         </td>
                                                                     </tr>
                                                                     {isExpanded && (
@@ -1020,18 +1107,32 @@ const FrameworkDetail = () => {
                                                             <p className="text-xs text-gray-500">Required for compliance.</p>
                                                         </div>
                                                     </div>
-                                                    <input
-                                                        type="file"
-                                                        id={`file-upload-${i}`}
-                                                        className="hidden"
-                                                        onChange={(e) => handleFileUpload(e, selectedControl.id)}
-                                                    />
-                                                    <button
-                                                        onClick={() => document.getElementById(`file-upload-${i}`).click()}
-                                                        className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50"
-                                                    >
-                                                        Upload
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="file"
+                                                            id={`file-upload-${i}`}
+                                                            className="hidden"
+                                                            onChange={(e) => handleFileUpload(e, selectedControl.id)}
+                                                        />
+                                                        <button
+                                                            onClick={() => document.getElementById(`file-upload-${i}`).click()}
+                                                            className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50"
+                                                        >
+                                                            Upload
+                                                        </button>
+                                                        {/* Generate Option for Policies/Procedures */}
+                                                        {(req.type === 'Policy' || req.type === 'Procedure' || req.name.toLowerCase().includes('policy') || req.name.toLowerCase().includes('plan')) && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleGenerateArtifact(req);
+                                                                }}
+                                                                className="text-xs font-bold text-purple-600 border border-purple-200 px-3 py-1 rounded hover:bg-purple-50 flex items-center gap-1"
+                                                            >
+                                                                <Zap className="w-3 h-3" /> Draft
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ));
                                         })()
@@ -1039,11 +1140,46 @@ const FrameworkDetail = () => {
                                 </div>
                             </div>
 
+                            {/* UPLOADED EVIDENCE SECTION */}
+                            {evidenceList && evidenceList.length > 0 && (
+                                <div className="mt-8">
+                                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                        <FileText className="w-5 h-5 text-blue-500" /> Uploaded Evidence
+                                    </h3>
+                                    <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
+                                        {evidenceList.map((ev, i) => (
+                                            <div key={ev.id} className="p-4 flex justify-between items-start group hover:bg-gray-50">
+                                                <div className="flex gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mt-1">
+                                                        <FileText className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">{ev.filename}</p>
+                                                        <p className="text-xs text-gray-500">{new Date(ev.uploaded_at || Date.now()).toLocaleDateString()} • {ev.title}</p>
+                                                        {ev.validation_source !== 'manual' && (
+                                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-800 mt-1">
+                                                                Verified by AI
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleReviewDocument(ev)}
+                                                    className="text-xs bg-white border border-indigo-200 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-50 font-bold flex items-center gap-1 shadow-sm"
+                                                >
+                                                    <Zap className="w-3 h-3" /> Review
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
 
                         <div className="p-6 border-t border-gray-200 bg-gray-50">
                             <div className="text-xs text-center text-gray-500 italic">
-                                {selectedControl.category === "Technical" ?
+                                {selectedControl.classification === "AUTO" ?
                                     "Control status is managed by automated compliance checks." :
                                     "Control status is automatically updated based on evidence uploads."}
                             </div>

@@ -64,18 +64,19 @@ export const AIService = {
      * Uses Backend Proxy to avoid exposing API Key.
      * @returns {Promise<Object>} - { requirements: [{ name, type, reasoning }] }
      */
-    analyzeControlRequirements: async (controlTitle, description, category = "General") => {
+    analyzeControlRequirements: async (controlTitle, description, category = "General", controlId = null) => {
         try {
             const token = localStorage.getItem('token');
             // Allow public access or use token if available
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'https://assurisk-backend.onrender.com/api/v1/ai/suggest-evidence',
+                'http://localhost:8000/api/v1/ai/suggest-evidence',
                 {
                     title: controlTitle,
                     description: description,
-                    category: category
+                    category: category,
+                    control_id: controlId
                 },
                 { headers }
             );
@@ -96,7 +97,7 @@ export const AIService = {
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'https://assurisk-backend.onrender.com/api/v1/ai/gap-analysis',
+                'http://localhost:8000/api/v1/ai/gap-analysis',
                 {
                     control_title: controlTitle,
                     requirements: requirements,
@@ -109,6 +110,55 @@ export const AIService = {
         } catch (error) {
             console.error("Gap Analysis Failed:", error);
             return null;
+        }
+    },
+
+    /**
+     * Generates a specific artifact (Policy, Report, etc.) for a requirement.
+     */
+    generateArtifact: async (controlTitle, artifactName, context) => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+            const response = await axios.post(
+                'http://localhost:8000/api/v1/ai/generate-artifact',
+                {
+                    control_title: controlTitle,
+                    artifact_name: artifactName,
+                    context: context
+                },
+                { headers }
+            );
+
+            return response.data.content;
+        } catch (error) {
+            console.error("Artifact Generation Failed:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Reviews a specific document against control requirements.
+     */
+    reviewDocument: async (controlId, evidenceId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+            const response = await axios.post(
+                'http://localhost:8000/api/v1/ai/review-document',
+                {
+                    control_id: controlId,
+                    evidence_id: evidenceId
+                },
+                { headers }
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error("Document Review Failed:", error);
+            throw error;
         }
     }
 };
