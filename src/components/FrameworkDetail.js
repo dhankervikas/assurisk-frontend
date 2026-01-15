@@ -431,10 +431,29 @@ const FrameworkDetail = () => {
             const total = allControls.length;
             const implemented = allControls.filter(c => c.status === 'IMPLEMENTED').length;
             setFramework(fwData);
+
+            // Advanced Stats Calculation
+            const techControls = allControls.filter(c =>
+                (c.category && (c.category === "Technical" || c.category.includes("Technological") || c.category.startsWith("A.8") || c.category.startsWith("CC7"))) ||
+                (c.classification === "Technical")
+            );
+            const docControls = allControls.filter(c => !techControls.find(tc => tc.id === c.id));
+
             setStats({
                 total,
                 implemented,
-                percentage: total > 0 ? Math.round((implemented / total) * 100) : 0
+                percentage: total > 0 ? Math.round((implemented / total) * 100) : 0,
+                // Advanced Breakdown
+                tests: {
+                    total: techControls.length,
+                    passing: techControls.filter(c => c.status === 'IMPLEMENTED').length,
+                    percentage: techControls.length > 0 ? Math.round((techControls.filter(c => c.status === 'IMPLEMENTED').length / techControls.length) * 100) : 0
+                },
+                documents: {
+                    total: docControls.length,
+                    ready: docControls.filter(c => c.status === 'IMPLEMENTED').length,
+                    percentage: docControls.length > 0 ? Math.round((docControls.filter(c => c.status === 'IMPLEMENTED').length / docControls.length) * 100) : 0
+                }
             });
             setLoading(false);
 
@@ -560,61 +579,153 @@ const FrameworkDetail = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 animate-fade-in relative">
-            {/* TOP HEADER */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <a onClick={() => navigate('/dashboard')} className="hover:text-gray-900 cursor-pointer">DASHBOARD</a>
-                            <span>/</span>
-                            <span className="font-medium text-gray-900">{framework.code}</span>
+            {/* PREMIUM HEADER */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 py-6">
+
+                    {/* TOP ROW: BREADCRUMB & ACTIONS */}
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
+                                <a onClick={() => navigate('/dashboard')} className="hover:text-blue-600 cursor-pointer transition-colors">Dashboard</a>
+                                <ChevronRight className="w-3 h-3" />
+                                <span>{framework.code}</span>
+                            </div>
+                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                {framework.name}
+                                {useGroupedView && <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">PREMIUM</span>}
+                            </h1>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={async () => {
+                                    if (window.confirm("RESET Data? This destroys progress.")) {
+                                        try {
+                                            await fetch(`${API_URL}/frameworks/${framework.id}/seed-controls`, { method: 'POST' });
+                                            window.location.reload();
+                                        } catch (e) { alert(e); }
+                                    }
+                                }}
+                                className="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg transition-colors"
+                            >
+                                Repair Data
+                            </button>
                         </div>
                     </div>
-                    <div className="flex justify-between items-end">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            {framework.name} {useGroupedView && <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded-full align-middle">(Premium View)</span>}
-                        </h1>
-                        <button
-                            onClick={async () => {
-                                if (window.confirm("This will RESET all controls for this framework to the correct 93 ISO controls. Existing progress will be lost. Continue?")) {
-                                    try {
-                                        const response = await fetch(`${API_URL}/frameworks/${framework.id}/seed-controls`, {
-                                            method: 'POST',
-                                        });
-                                        if (response.ok) {
-                                            alert("Data repaired successfully! refreshing...");
-                                            window.location.reload();
-                                        } else {
-                                            const err = await response.json();
-                                            alert("Failed: " + err.detail);
-                                        }
-                                    } catch (error) {
-                                        alert("Error: " + error.message);
-                                    }
-                                }
-                            }}
-                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
-                        >
-                            Repair Data
-                        </button>
+
+                    {/* MIDDLE ROW: DASHBOARD WIDGETS */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        {/* WIDGET 1: CONTROLS PROGRESS */}
+                        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col justify-between">
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-lg font-bold text-gray-900">Controls</h3>
+                                <button className="text-xs font-bold text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1 rounded">View analytics</button>
+                            </div>
+
+                            <div className="flex gap-8 items-end">
+                                {/* MAIN PROGRESS */}
+                                <div className="flex-1">
+                                    <div className="text-4xl font-extrabold text-gray-900 mb-2">{stats.percentage}%</div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                                        <div className="bg-green-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${stats.percentage}%` }}></div>
+                                    </div>
+                                    <div className="text-xs font-medium text-gray-500 flex justify-between">
+                                        <span>{stats.implemented} completed</span>
+                                        <span>{stats.total} total</span>
+                                    </div>
+                                </div>
+
+                                {/* BREAKDOWN */}
+                                <div className="flex-1 space-y-3 pl-6 border-l border-gray-100">
+                                    <div>
+                                        <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                                            <span>Tests</span>
+                                            <span className="text-gray-400">{stats.tests?.passing || 0}/{stats.tests?.total || 0}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${stats.tests?.percentage || 0}%` }}></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                                            <span>Documents</span>
+                                            <span className="text-gray-400">{stats.documents?.ready || 0}/{stats.documents?.total || 0}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${stats.documents?.percentage || 0}%` }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* WIDGET 2: AUDIT TIMELINE (MOCKED VISUAL) */}
+                        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-bold text-gray-900">Audit timeline</h3>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+                                        In audit
+                                    </span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button className="text-xs font-bold text-gray-600 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50">View as auditor</button>
+                                </div>
+                            </div>
+
+                            <p className="text-xs font-medium text-gray-500 mb-4">Now until July 26 <AlertCircle className="w-3 h-3 inline ml-1 text-gray-400" /></p>
+
+                            {/* TIMELINE VISUAL */}
+                            <div className="relative mt-2">
+                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -z-10 transform -translate-y-1/2"></div>
+                                <div className="absolute top-1/2 left-0 w-1/3 h-0.5 bg-orange-500 -z-10 transform -translate-y-1/2"></div>
+
+                                <div className="flex justify-between items-center relative">
+                                    {['Now', 'May', 'Jul', 'Sep', 'Nov', 'Jan'].map((month, i) => (
+                                        <div key={month} className="flex flex-col items-center gap-2">
+                                            <div className={`w-3 h-3 rounded-full border-2 ${i < 3 ? 'bg-orange-500 border-orange-500' : 'bg-white border-gray-300'}`}></div>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{month}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* BOTTOM ROW: FILTER BAR */}
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-t border-gray-100 pt-6">
+                        {/* SEARCH */}
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Search controls..."
+                                className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        {/* FILTERS */}
+                        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+                            <span className="text-xs font-bold text-gray-500 mr-2 whitespace-nowrap">Filter by</span>
+                            <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap">Status</button>
+                            <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap">Owner</button>
+                            <div className="h-4 w-px bg-gray-300 mx-2"></div>
+                            <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2">
+                                Jump to Section <ChevronDown className="w-3 h-3 text-gray-400" />
+                            </button>
+                            <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2">
+                                Group by Section <ChevronDown className="w-3 h-3 text-gray-400" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-                {/* SEARCH */}
-                <div className="flex items-center justify-between">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input
-                            type="text"
-                            placeholder="Search controls..."
-                            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-64 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
+                {/* CONTENT AREA starts here */}
 
                 {/* CONTENT AREA */}
                 <div className="space-y-10">
