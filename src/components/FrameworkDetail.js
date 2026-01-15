@@ -9,7 +9,7 @@ import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 import { AIService } from '../services/aiService';
 
 
-const API_URL = 'http://localhost:8000';
+const API_URL = "https://assurisk-backend.onrender.com/api/v1";
 
 // COSO DESCRIPTIONS MAP
 const COSO_DESCRIPTIONS = {
@@ -78,6 +78,19 @@ const COSO_DESCRIPTIONS = {
     "Risk Management": "Clauses 6 & 8: Risk Assessment and Treatment",
     "Performance Evaluation": "Clauses 9 & Annex A.5: Audit, Review, and Monitoring",
     "Improvement": "Clause 10: Corrective Action and Continual Improvement",
+
+    // NEW STANDARD ISO MAPPINGS
+    "Clause 4: Context of the organization": "Clause 4: External/Internal Issues, Interested Parties, Scope, and SMS",
+    "Clause 5: Leadership": "Clause 5: Leadership, Policy, and Roles",
+    "Clause 6: Planning": "Clause 6: Risk Assessment, Treatment, and Objectives",
+    "Clause 7: Support": "Clause 7: Resources, Competence, Awareness, and Documented Information",
+    "Clause 8: Operation": "Clause 8: Operational Planning and Risk Control",
+    "Clause 9: Performance evaluation": "Clause 9: Monitoring, Measurement, Audit, and Management Review",
+    "Clause 10: Improvement": "Clause 10: Nonconformity and Continual Improvement",
+    "Organizational controls": "Annex A.5: Information Security Policies, Organization, and Human Resources",
+    "People controls": "Annex A.6: People Security",
+    "Physical controls": "Annex A.7: Physical Security",
+    "Technological controls": "Annex A.8: Technological Security",
 
     "DEFAULT": "Standard requirement for this criteria."
 };
@@ -577,6 +590,18 @@ const FrameworkDetail = () => {
                         Object.keys(socControls).sort((a, b) => {
                             // ISO 27001 Custom Sort Order
                             const ISO_ORDER = [
+                                "Clause 4: Context of the organization",
+                                "Clause 5: Leadership",
+                                "Clause 6: Planning",
+                                "Clause 7: Support",
+                                "Clause 8: Operation",
+                                "Clause 9: Performance evaluation",
+                                "Clause 10: Improvement",
+                                "Organizational controls",
+                                "People controls",
+                                "Physical controls",
+                                "Technological controls",
+                                // Legacy mappings fallback
                                 "Governance & Policy",
                                 "Risk Management",
                                 "Performance Evaluation",
