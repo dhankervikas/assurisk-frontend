@@ -6,6 +6,13 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
 import FrameworkDetail from './components/FrameworkDetail';
+import SystemEffectiveness from './components/SystemEffectiveness';
+import ReportsDashboard from './components/ReportsDashboard';
+import InitiationWizard from './components/AuditorPortal/InitiationWizard';
+import AuditorDashboard from './components/AuditorPortal/AuditorDashboard';
+
+
+
 import ErrorBoundary from './components/ErrorBoundary'; // Import ErrorBoundary
 
 // --- PLACEHOLDER COMPONENT FOR NEW ROUTES ---
@@ -70,6 +77,18 @@ function App() {
                             }
                         />
 
+                        {/* EFFECTIVENESS DASHBOARD */}
+                        <Route
+                            path="/effectiveness"
+                            element={
+                                <ProtectedRoute>
+                                    <ProtectedLayout>
+                                        <SystemEffectiveness />
+                                    </ProtectedLayout>
+                                </ProtectedRoute>
+                            }
+                        />
+
                         {/* FRAMEWORKS DETAIL */}
                         <Route
                             path="/frameworks/:id"
@@ -95,8 +114,14 @@ function App() {
                         <Route path="/vendors" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Vendors" /></ProtectedLayout></ProtectedRoute>} />
 
                         {/* REPORTS */}
-                        <Route path="/frameworks" element={<ProtectedRoute><ProtectedLayout><Dashboard /></ProtectedLayout></ProtectedRoute>} /> {/* List View -> Dashboard for now */}
-                        <Route path="/trust-report" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="Trust Report" /></ProtectedLayout></ProtectedRoute>} />
+
+                        <Route path="/trust-report" element={<ProtectedRoute><ProtectedLayout><ReportsDashboard /></ProtectedLayout></ProtectedRoute>} />
+
+                        {/* AUDITOR PORTAL */}
+                        <Route path="/auditor-portal" element={<ProtectedRoute><InitiationWizard /></ProtectedRoute>} />
+                        <Route path="/auditor-portal/dashboard" element={<ProtectedRoute><AuditorDashboard /></ProtectedRoute>} />
+
+
 
                         {/* MANAGE */}
                         <Route path="/people" element={<ProtectedRoute><ProtectedLayout><PlaceholderPage title="People" /></ProtectedLayout></ProtectedRoute>} />

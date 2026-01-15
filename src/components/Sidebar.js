@@ -41,6 +41,9 @@ const Sidebar = () => {
             label: 'OVERVIEW',
             items: [
                 { label: 'Dashboard', path: '/dashboard', icon: Home },
+
+
+                { label: 'Effectiveness', path: '/effectiveness', icon: BarChart2, badge: 'NEW' },
                 { label: 'Controls', path: '/controls', icon: Shield },
                 { label: 'Monitors', path: '/monitors', icon: Monitor },
                 { label: 'Get started', path: '/get-started', icon: CheckSquare, badge: '16 of 17' }
@@ -61,7 +64,8 @@ const Sidebar = () => {
             label: 'REPORT',
             items: [
                 { label: 'Frameworks', path: '/frameworks', icon: Layers }, // Go to Dashboard/List?
-                { label: 'Trust Report', path: '/trust-report', icon: Lock }
+                { label: 'Trust Report', path: '/trust-report', icon: Lock },
+                { label: 'Auditor Portal', path: '/auditor-portal', icon: Shield }
             ]
         },
         {
