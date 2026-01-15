@@ -233,6 +233,17 @@ const FrameworkDetail = () => {
     const [generatedPolicy, setGeneratedPolicy] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
 
+    // FILTER STATE
+    const [statusFilter, setStatusFilter] = useState('All'); // 'All', 'Implemented', 'Not Implemented'
+
+    // JUMP TO SECTION HANDLER
+    const handleJumpToSection = (sectionId) => {
+        const element = document.getElementById(`section-${sectionId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     // GAP ANALYSIS STATE
     const [gapAnalysis, setGapAnalysis] = useState(null);
     const [analyzingGap, setAnalyzingGap] = useState(false);
@@ -477,8 +488,20 @@ const FrameworkDetail = () => {
     const useGroupedView = isSOC2 || isISO;
 
     const getFilteredControls = (controls) => {
-        if (!searchTerm) return controls;
-        return controls.filter(c => c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        let res = controls;
+        // 1. Text Search
+        if (searchTerm) {
+            res = res.filter(c => c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+        // 2. Status Filter
+        if (statusFilter !== 'All') {
+            if (statusFilter === 'Implemented') {
+                res = res.filter(c => c.status === 'IMPLEMENTED');
+            } else if (statusFilter === 'Pending') {
+                res = res.filter(c => c.status !== 'IMPLEMENTED');
+            }
+        }
+        return res;
     };
 
     // MOCK EVIDENCE CALCULATOR (Random consistency for demo)
@@ -710,13 +733,37 @@ const FrameworkDetail = () => {
                         {/* FILTERS */}
                         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
                             <span className="text-xs font-bold text-gray-500 mr-2 whitespace-nowrap">Filter by</span>
-                            <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap">Status</button>
-                            <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap">Owner</button>
-                            <div className="h-4 w-px bg-gray-300 mx-2"></div>
-                            <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2">
-                                Jump to Section <ChevronDown className="w-3 h-3 text-gray-400" />
+
+                            {/* Status Filter Toggle */}
+                            <button
+                                onClick={() => setStatusFilter(prev => prev === 'All' ? 'Implemented' : prev === 'Implemented' ? 'Pending' : 'All')}
+                                className={`text-xs font-medium border px-3 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${statusFilter !== 'All'
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200 ring-2 ring-blue-100'
+                                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                    }`}
+                            >
+                                Status: {statusFilter}
                             </button>
-                            <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2">
+
+                            <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap opacity-50 cursor-not-allowed" title="Coming Soon">Owner</button>
+
+                            <div className="h-4 w-px bg-gray-300 mx-2"></div>
+
+                            {/* Jump to Section Dropdown (Native Select for simplicity) */}
+                            <div className="relative">
+                                <select
+                                    onChange={(e) => handleJumpToSection(e.target.value)}
+                                    className="appearance-none pl-3 pr-8 py-1.5 text-xs font-bold text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Jump to Section</option>
+                                    {socControls && Object.keys(socControls).sort().map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2.5 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+                            </div>
+
+                            <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2 opacity-60">
                                 Group by Section <ChevronDown className="w-3 h-3 text-gray-400" />
                             </button>
                         </div>
@@ -795,7 +842,7 @@ const FrameworkDetail = () => {
                             const cosoText = COSO_DESCRIPTIONS[category] || COSO_DESCRIPTIONS["DEFAULT"];
 
                             return (
-                                <div key={category} className="mb-8">
+                                <div key={category} id={`section-${category}`} className="mb-8 scroll-mt-32">
                                     <div className="mb-4">
                                         <h2 className="text-xl font-bold text-gray-900">{category}</h2>
                                     </div>
