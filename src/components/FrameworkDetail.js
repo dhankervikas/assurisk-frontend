@@ -734,16 +734,22 @@ const FrameworkDetail = () => {
                         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
                             <span className="text-xs font-bold text-gray-500 mr-2 whitespace-nowrap">Filter by</span>
 
-                            {/* Status Filter Toggle */}
-                            <button
-                                onClick={() => setStatusFilter(prev => prev === 'All' ? 'Implemented' : prev === 'Implemented' ? 'Pending' : 'All')}
-                                className={`text-xs font-medium border px-3 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${statusFilter !== 'All'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200 ring-2 ring-blue-100'
-                                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                                    }`}
-                            >
-                                Status: {statusFilter}
-                            </button>
+                            {/* Status Filter Dropdown */}
+                            <div className="relative">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className={`appearance-none pl-3 pr-8 py-1.5 text-xs font-medium border rounded-lg shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${statusFilter !== 'All'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                >
+                                    <option value="All">Status: All</option>
+                                    <option value="Implemented">Status: Implemented</option>
+                                    <option value="Pending">Status: Pending</option>
+                                </select>
+                                <ChevronDown className={`w-3 h-3 absolute right-2.5 top-1/2 transform -translate-y-1/2 pointer-events-none ${statusFilter !== 'All' ? 'text-blue-500' : 'text-gray-400'}`} />
+                            </div>
 
                             <button className="text-xs font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 shadow-sm whitespace-nowrap opacity-50 cursor-not-allowed" title="Coming Soon">Owner</button>
 
