@@ -1,7 +1,9 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/v1';
+import config from '../config';
+
+const API_URL = config.API_BASE_URL;
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -19,10 +21,10 @@ export const auditService = {
         return response.data;
     },
 
-    reviewEvidence: async (evidenceId, status, comment) => {
+    reviewEvidence: async (evidenceId, payload) => {
         const response = await axios.post(
             `${API_URL}/audits/evidence/${evidenceId}/review`,
-            { status, comment },
+            payload,
             { headers: getAuthHeaders() }
         );
         return response.data;

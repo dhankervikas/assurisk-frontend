@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-// Hardcoded for Production to fix popup issue
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+import config from '../config';
+
+const API_BASE_URL = config.API_BASE_URL;
 
 const api = axios.create({
     baseURL: API_BASE_URL,

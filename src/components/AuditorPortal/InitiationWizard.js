@@ -130,9 +130,10 @@ const InitiationWizard = () => {
                                             className="w-full rounded-lg border-gray-300 shadow-sm py-2.5 px-3 bg-gray-50 border"
                                         >
                                             <option value="">Select Priority...</option>
-                                            <option value="ACCESS_CONTROL">Access Control (A.9)</option>
-                                            <option value="SUPPLIER_RELATIONSHIPS">Supplier Relationships (A.15)</option>
-                                            <option value="INCIDENT_MGMT">Incident Management (A.16)</option>
+                                            <option value="ORGANIZATIONAL">Organizational Controls (A.5)</option>
+                                            <option value="PEOPLE">People Controls (A.6)</option>
+                                            <option value="PHYSICAL">Physical Controls (A.7)</option>
+                                            <option value="TECHNOLOGICAL">Technological Controls (A.8)</option>
                                             <option value="FULL_SCOPE">Full Scope</option>
                                         </select>
                                     </div>
