@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    Activity, Clock, AlertTriangle, CheckCircle,
-    TrendingUp, TrendingDown, RefreshCw
+    CheckCircle, TrendingUp, AlertTriangle,
+    Activity, Clock, RefreshCw
 } from 'lucide-react';
 
 import LogDetailModal from './LogDetailModal';

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import {
-    X, CheckCircle, AlertTriangle, FileText,
+    X, CheckCircle, AlertTriangle,
     Terminal, ArrowRight, Shield, Download
 } from 'lucide-react';
 import jsPDF from 'jspdf';

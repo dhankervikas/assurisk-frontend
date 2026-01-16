@@ -33,6 +33,7 @@ const Sidebar = () => {
     };
 
     // Helper to determine if a group contains the active route
+    // eslint-disable-next-line no-unused-vars
     const isActive = (path) => location.pathname.startsWith(path);
 
     const navGroups = [

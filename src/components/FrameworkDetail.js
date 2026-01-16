@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, Zap, Activity, FileText
+    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, TrendingUp, AlertTriangle,
+    Zap, Activity, FileText
 } from 'lucide-react';
 import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
 import { AIService } from '../services/aiService';
@@ -238,7 +239,7 @@ const FrameworkDetail = () => {
 
     // JUMP TO SECTION HANDLER
     const handleJumpToSection = (sectionId) => {
-        const element = document.getElementById(`section-${sectionId}`);
+        const element = document.getElementById(`section - ${sectionId} `);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -295,6 +296,7 @@ const FrameworkDetail = () => {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     // FETCH EVIDENCE & RESET AI WHEN CONTROL IS SELECTED
@@ -350,7 +352,7 @@ const FrameworkDetail = () => {
     const fetchEvidence = async (controlId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_URL}/evidence/control/${controlId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get(`${API_URL} /evidence/control / ${controlId} `, { headers: { Authorization: `Bearer ${token} ` } });
             setEvidenceList(res.data);
         } catch (e) {
             console.error("Failed to load evidence", e);
@@ -362,7 +364,7 @@ const FrameworkDetail = () => {
             alert(`Reviewing ${evidence.filename}... This may take a few seconds.`);
             const result = await AIService.reviewDocument(selectedControl.id, evidence.id);
             console.log("Review Result:", result);
-            alert(`AI Verdict: ${result.status}\n\nReasoning: ${result.reasoning}`);
+            alert(`AI Verdict: ${result.status} \n\nReasoning: ${result.reasoning} `);
             fetchEvidence(selectedControl.id);
         } catch (error) {
             alert("Review Failed: " + error.message);
@@ -381,9 +383,9 @@ const FrameworkDetail = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${API_URL}/evidence/upload`, formData, {
+            await axios.post(`${API_URL} /evidence/upload`, formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token} `,
                     'Content-Type': 'multipart/form-data'
                 }
             });
@@ -400,15 +402,15 @@ const FrameworkDetail = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const headers = { Authorization: `Bearer ${token}` };
+            const headers = { Authorization: `Bearer ${token} ` };
 
-            const fwRes = await axios.get(`${API_URL}/frameworks/${id}`, { headers });
+            const fwRes = await axios.get(`${API_URL} /frameworks/${id} `, { headers });
             const fwData = fwRes.data;
             const isSOC2 = fwData.code && fwData.code.includes("SOC2");
             const isISO = fwData.code && fwData.code.includes("ISO27001");
             const useGroupedView = isSOC2 || isISO;
 
-            const ctrlRes = await axios.get(`${API_URL}/controls/?limit=10000`, { headers });
+            const ctrlRes = await axios.get(`${API_URL} /controls/ ? limit = 10000`, { headers });
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
             if (useGroupedView) {
@@ -429,7 +431,7 @@ const FrameworkDetail = () => {
                 setSocControls(grouped);
                 setProcesses([]);
             } else {
-                const procRes = await axios.get(`${API_URL}/processes/`, { headers });
+                const procRes = await axios.get(`${API_URL} /processes/`, { headers });
                 const filteredProcesses = procRes.data.map(proc => {
                     const relevantSubs = proc.sub_processes.map(sub => {
                         return { ...sub, controls: sub.controls || [] };
@@ -470,7 +472,7 @@ const FrameworkDetail = () => {
 
         } catch (err) {
             console.error(err);
-            setError(`Failed to load data: ${err.message}`);
+            setError(`Failed to load data: ${err.message} `);
             setLoading(false);
         }
     };
@@ -568,14 +570,11 @@ const FrameworkDetail = () => {
             return { total: 0, uploaded: control.evidence || [] };
         };
 
+        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
         const isRequirementMet = (reqIdx, uploadedFiles) => {
             // PERMISSIVE LOGIC: If ANY file is uploaded, mark the first requirement as met.
-            // If 2 files, mark first 2, etc.
-            // Real logic should match type, but for beta, we just want to see progress.
             if (!uploadedFiles || uploadedFiles.length === 0) return false;
-
-            // If the requirement asks for "Policy", and we have a file with "Policy" in name/type...
-            // For now, simple count matching:
             return reqIdx < uploadedFiles.length;
         };
         if (titleLower.includes("vendor") || titleLower.includes("supplier") || titleLower.includes("third party")) {
@@ -624,7 +623,7 @@ const FrameworkDetail = () => {
                                 onClick={async () => {
                                     if (window.confirm("RESET Data? This destroys progress.")) {
                                         try {
-                                            await fetch(`${API_URL}/frameworks/${framework.id}/seed-controls`, { method: 'POST' });
+                                            await fetch(`${API_URL} /frameworks/${framework.id}/seed-controls`, { method: 'POST' });
                                             window.location.reload();
                                         } catch (e) { alert(e); }
                                     }
@@ -632,14 +631,14 @@ const FrameworkDetail = () => {
                                 className="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg transition-colors"
                             >
                                 Repair Data
-                            </button>
-                        </div>
-                    </div>
+                            </button >
+                        </div >
+                    </div >
 
                     {/* MIDDLE ROW: DASHBOARD WIDGETS */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    < div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" >
                         {/* WIDGET 1: CONTROLS PROGRESS */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col justify-between">
+                        < div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col justify-between" >
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="text-lg font-bold text-gray-900">Controls</h3>
                                 <button className="text-xs font-bold text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1 rounded">View analytics</button>
@@ -680,10 +679,10 @@ const FrameworkDetail = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div >
 
                         {/* WIDGET 2: AUDIT TIMELINE (MOCKED VISUAL) */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col">
+                        < div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col" >
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-3">
                                     <h3 className="text-lg font-bold text-gray-900">Audit timeline</h3>
@@ -713,13 +712,13 @@ const FrameworkDetail = () => {
                                     ))}
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </div >
+                    </div >
 
                     {/* BOTTOM ROW: FILTER BAR */}
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-t border-gray-100 pt-6">
+                    < div className="flex flex-col md:flex-row gap-4 items-center justify-between border-t border-gray-100 pt-6" >
                         {/* SEARCH */}
-                        <div className="relative w-full md:w-64">
+                        < div className="relative w-full md:w-64" >
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
@@ -728,10 +727,10 @@ const FrameworkDetail = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                        </div>
+                        </div >
 
                         {/* FILTERS */}
-                        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+                        < div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto" >
                             <span className="text-xs font-bold text-gray-500 mr-2 whitespace-nowrap">Filter by</span>
 
                             {/* Status Filter Dropdown */}
@@ -740,8 +739,8 @@ const FrameworkDetail = () => {
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                     className={`appearance-none pl-3 pr-8 py-1.5 text-xs font-medium border rounded-lg shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${statusFilter !== 'All'
-                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
                                     <option value="All">Status: All</option>
@@ -772,10 +771,10 @@ const FrameworkDetail = () => {
                             <button className="text-xs font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 shadow-sm whitespace-nowrap flex items-center gap-2 opacity-60">
                                 Group by Section <ChevronDown className="w-3 h-3 text-gray-400" />
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </div >
+                    </div >
+                </div >
+            </div >
 
             <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
                 {/* CONTENT AREA starts here */}
@@ -961,397 +960,399 @@ const FrameworkDetail = () => {
             </div>
 
             {/* CONTROL DRAWER */}
-            {selectedControl && (
-                <div className="fixed inset-0 z-50 flex justify-end">
-                    <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm" onClick={() => setSelectedControl(null)}></div>
-                    <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col transform transition-transform animate-slide-in-right overflow-y-auto">
-                        <button
-                            onClick={() => setSelectedControl(null)}
-                            className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200"
-                        >
-                            <X className="w-5 h-5 text-gray-600" />
-                        </button>
+            {
+                selectedControl && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm" onClick={() => setSelectedControl(null)}></div>
+                        <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col transform transition-transform animate-slide-in-right overflow-y-auto">
+                            <button
+                                onClick={() => setSelectedControl(null)}
+                                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+                            >
+                                <X className="w-5 h-5 text-gray-600" />
+                            </button>
 
 // ... imports
 
 
-                        // ... in JSX, inside the Drawer, maybe after Description
-                        <div className="p-8 pb-4 border-b border-gray-100">
-                            <div className="flex gap-2 mb-2">
-                                <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded inline-block">
-                                    {selectedControl.category}
-                                </span>
-                                <span className="text-xs font-bold text-gray-500 px-2 py-1 bg-gray-100 rounded inline-block font-mono">
-                                    {selectedControl.control_id}
-                                </span>
-                                <span className={`text-xs font-bold px-2 py-1 rounded inline-block border ${selectedControl.classification === 'AUTO' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                                    {selectedControl.classification || "MANUAL"}
-                                </span>
-                            </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
-                            <p className="text-gray-500 text-sm mb-4">
-                                {COSO_DESCRIPTIONS[selectedControl.category] || selectedControl.description}
-                            </p>
+                            // ... in JSX, inside the Drawer, maybe after Description
+                            <div className="p-8 pb-4 border-b border-gray-100">
+                                <div className="flex gap-2 mb-2">
+                                    <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded inline-block">
+                                        {selectedControl.category}
+                                    </span>
+                                    <span className="text-xs font-bold text-gray-500 px-2 py-1 bg-gray-100 rounded inline-block font-mono">
+                                        {selectedControl.control_id}
+                                    </span>
+                                    <span className={`text-xs font-bold px-2 py-1 rounded inline-block border ${selectedControl.classification === 'AUTO' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                                        {selectedControl.classification || "MANUAL"}
+                                    </span>
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedControl.title}</h2>
+                                <p className="text-gray-500 text-sm mb-4">
+                                    {COSO_DESCRIPTIONS[selectedControl.category] || selectedControl.description}
+                                </p>
 
-                            {/* AI POLICY GENERATOR */}
-                            <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2">
-                                        <Shield className="w-4 h-4" /> AI Policy Drafter
-                                    </h3>
-                                    {!generatedPolicy && (
-                                        <button
-                                            onClick={handleGeneratePolicy}
-                                            disabled={isGenerating}
-                                            className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-md font-bold hover:bg-purple-700 disabled:opacity-50 transition-colors"
-                                        >
-                                            {isGenerating ? "Drafting..." : "Auto-Generate Policy"}
-                                        </button>
+                                {/* AI POLICY GENERATOR */}
+                                <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2">
+                                            <Shield className="w-4 h-4" /> AI Policy Drafter
+                                        </h3>
+                                        {!generatedPolicy && (
+                                            <button
+                                                onClick={handleGeneratePolicy}
+                                                disabled={isGenerating}
+                                                className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-md font-bold hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                            >
+                                                {isGenerating ? "Drafting..." : "Auto-Generate Policy"}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {generatedPolicy ? (
+                                        <div className="text-xs text-gray-700 whitespace-pre-wrap bg-white p-3 rounded border border-purple-100 max-h-60 overflow-y-auto">
+                                            {generatedPolicy}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-purple-700 italic">
+                                            Need a formal policy? Click generate to draft one instantly using AI.
+                                        </p>
                                     )}
                                 </div>
-                                {generatedPolicy ? (
-                                    <div className="text-xs text-gray-700 whitespace-pre-wrap bg-white p-3 rounded border border-purple-100 max-h-60 overflow-y-auto">
-                                        {generatedPolicy}
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-purple-700 italic">
-                                        Need a formal policy? Click generate to draft one instantly using AI.
-                                    </p>
-                                )}
                             </div>
-                        </div>
 
-                        <div className="p-8 space-y-8 flex-1">
+                            <div className="p-8 space-y-8 flex-1">
 
 
-                            {/* STANDARD REQUIREMENTS SECTION */}
-                            <div className={`border rounded-xl p-5 ${aiRequirements ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
-                                <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 ${aiRequirements ? 'text-purple-900' : 'text-blue-900'}`}>
-                                    {aiRequirements ? <Zap className="w-5 h-5 text-purple-600" /> : <Shield className="w-5 h-5" />}
-                                    {aiRequirements ? "AI-Suggested Requirements" : "Standard Requirements"}
-                                </h3>
+                                {/* STANDARD REQUIREMENTS SECTION */}
+                                <div className={`border rounded-xl p-5 ${aiRequirements ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
+                                    <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 ${aiRequirements ? 'text-purple-900' : 'text-blue-900'}`}>
+                                        {aiRequirements ? <Zap className="w-5 h-5 text-purple-600" /> : <Shield className="w-5 h-5" />}
+                                        {aiRequirements ? "AI-Suggested Requirements" : "Standard Requirements"}
+                                    </h3>
 
-                                <div className="space-y-3">
-                                    {aiExplanation && (
-                                        <div className="mb-4 text-sm text-gray-700 bg-white p-3 rounded-lg border border-purple-100 shadow-sm leading-relaxed">
-                                            <span className="font-bold text-purple-800">Clause Requirement: </span>
-                                            {typeof aiExplanation === 'object' ? JSON.stringify(aiExplanation) : aiExplanation}
-                                        </div>
-                                    )}
+                                    <div className="space-y-3">
+                                        {aiExplanation && (
+                                            <div className="mb-4 text-sm text-gray-700 bg-white p-3 rounded-lg border border-purple-100 shadow-sm leading-relaxed">
+                                                <span className="font-bold text-purple-800">Clause Requirement: </span>
+                                                {typeof aiExplanation === 'object' ? JSON.stringify(aiExplanation) : aiExplanation}
+                                            </div>
+                                        )}
 
-                                    {loadingAi && (
-                                        <div className="p-4 bg-blue-50 text-blue-600 rounded-lg flex items-center gap-2 animate-pulse">
-                                            <Shield className="w-5 h-5" />
-                                            <span className="text-sm font-semibold">Analyzing control requirements with AI...</span>
-                                        </div>
-                                    )}
+                                        {loadingAi && (
+                                            <div className="p-4 bg-blue-50 text-blue-600 rounded-lg flex items-center gap-2 animate-pulse">
+                                                <Shield className="w-5 h-5" />
+                                                <span className="text-sm font-semibold">Analyzing control requirements with AI...</span>
+                                            </div>
+                                        )}
 
-                                    {aiError && (
-                                        <div className="p-3 bg-red-50 text-red-600 rounded-lg flex items-center justify-between">
-                                            <span className="text-sm font-medium">AI Analysis Failed. showing defaults.</span>
+                                        {aiError && (
+                                            <div className="p-3 bg-red-50 text-red-600 rounded-lg flex items-center justify-between">
+                                                <span className="text-sm font-medium">AI Analysis Failed. showing defaults.</span>
+                                                <button
+                                                    onClick={() => fetchAiRequirements(selectedControl)}
+                                                    className="text-xs bg-white border border-red-200 px-3 py-1 rounded hover:bg-red-100 font-bold"
+                                                >
+                                                    Retry
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {!loadingAi && (() => {
+                                            const reqs = getRequirements(selectedControl);
+                                            const stats = getEvidenceStats(selectedControl.control_id);
+
+                                            return (
+                                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                                                    <table className="w-full text-left border-collapse">
+                                                        <thead>
+                                                            <tr className="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                                <th className="p-3 w-1/4">Requirement</th>
+                                                                <th className="p-3 w-1/4">Description</th>
+                                                                <th className="p-3 w-1/12">Source</th>
+                                                                <th className="p-3 w-1/12">Owner</th>
+                                                                <th className="p-3 w-1/12">Status</th>
+                                                                <th className="p-3 w-1/6">Last Update</th>
+                                                                <th className="p-3 w-1/12 text-center">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {reqs.map((req, idx) => {
+                                                                const isMet = isRequirementMet(idx, stats.uploaded);
+                                                                const isExpanded = expandedReq === idx;
+
+                                                                return (
+                                                                    <React.Fragment key={idx}>
+                                                                        <tr
+                                                                            onClick={() => setExpandedReq(isExpanded ? null : idx)}
+                                                                            className={`cursor-pointer hover:bg-slate-50 transition-colors ${isExpanded ? 'bg-slate-50' : ''}`}
+                                                                        >
+                                                                            <td className="p-3 text-sm font-medium text-gray-900 border-l-4 border-transparent hover:border-purple-400">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                                                                                    {req.name}
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="p-3 text-xs text-gray-600 max-w-xs truncate" title={req.desc || req.name}>
+                                                                                {req.desc || "Standard verification matching control requirements."}
+                                                                            </td>
+                                                                            <td className="p-3 text-xs text-gray-500">
+                                                                                {selectedControl.category === "Technical" ?
+                                                                                    <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Auto</span> :
+                                                                                    "Manual"
+                                                                                }
+                                                                            </td>
+                                                                            <td className="p-3 text-xs text-gray-500">
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px] font-bold">SY</div>
+                                                                                    <span>System</span>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="p-3">
+                                                                                {isMet ? (
+                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                                        PASSING
+                                                                                    </span>
+                                                                                ) : (
+                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                                                        MISSING
+                                                                                    </span>
+                                                                                )}
+                                                                            </td>
+                                                                            <td className="p-3 text-xs text-gray-400">
+                                                                                {new Date().toLocaleDateString()}
+                                                                            </td>
+                                                                            <td className="p-3 text-right flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                                                <input
+                                                                                    type="file"
+                                                                                    id={`file-upload-req-${idx}`}
+                                                                                    className="hidden"
+                                                                                    onChange={(e) => handleFileUpload(e, selectedControl.id)}
+                                                                                />
+                                                                                <button
+                                                                                    onClick={() => document.getElementById(`file-upload-req-${idx}`).click()}
+                                                                                    title="Upload Evidence"
+                                                                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                                                >
+                                                                                    <Upload className="w-4 h-4" />
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleGenerateArtifact(req)}
+                                                                                    title="Auto-Generate Draft"
+                                                                                    className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded"
+                                                                                >
+                                                                                    <Zap className="w-4 h-4" />
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        {isExpanded && (
+                                                                            <tr className="bg-slate-50">
+                                                                                <td colSpan="6" className="p-4 pl-12">
+                                                                                    <div className="space-y-4">
+                                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                                            <div>
+                                                                                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Evidence Context</h4>
+                                                                                                <p className="text-sm text-gray-700 leading-relaxed">
+                                                                                                    {req.desc || "This requirement verifies that the specific control implementation matches compliance standards. Ensure evidence is uploaded or automated checks are enabled."}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Check Logic</h4>
+                                                                                                <code className="text-xs bg-gray-100 p-2 rounded block font-mono text-gray-600">
+                                                                                                    MATCH(evidence.tags, ["{req.type}", "{selectedControl.control_id}"])
+                                                                                                </code>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="bg-white border rounded-lg p-3">
+                                                                                            <h4 className="text-xs font-bold text-gray-900 mb-2">History & Activity</h4>
+                                                                                            <div className="text-xs text-gray-500 italic">No recent activity detected for this requirement.</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+
+                                {/* GAP ANALYSIS SECTION */}
+                                <div className="border border-indigo-100 bg-indigo-50 rounded-xl p-5 mt-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+                                            <Activity className="w-5 h-5 text-indigo-600" /> Compliance Status Engine
+                                        </h3>
+                                        {gapAnalysis && (
+                                            <span className={`text-xs font-bold px-3 py-1 rounded-full ${gapAnalysis.status === 'MET' ? 'bg-green-100 text-green-700' :
+                                                gapAnalysis.status === 'PARTIAL' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
+                                                }`}>
+                                                AI VERDICT: {gapAnalysis.status}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {!gapAnalysis ? (
+                                        <div className="text-center py-6">
+                                            <p className="text-sm text-indigo-800 mb-3">Analyze uploaded evidence against requirements to determine automated status.</p>
                                             <button
-                                                onClick={() => fetchAiRequirements(selectedControl)}
-                                                className="text-xs bg-white border border-red-200 px-3 py-1 rounded hover:bg-red-100 font-bold"
+                                                onClick={handleGapAnalysis}
+                                                disabled={analyzingGap}
+                                                className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg shadow-sm hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 mx-auto"
                                             >
-                                                Retry
+                                                {analyzingGap ? <span className="animate-spin">⌛</span> : <Zap className="w-4 h-4" />}
+                                                {analyzingGap ? "Analyzing Compliance..." : "Run Gap Analysis"}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div className="bg-white p-4 rounded-lg border border-indigo-100 text-sm text-gray-700">
+                                                <strong className="block text-gray-900 mb-1">Reasoning:</strong>
+                                                {gapAnalysis.reasoning}
+                                            </div>
+                                            {gapAnalysis.missing_items && gapAnalysis.missing_items.length > 0 && (
+                                                <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+                                                    <strong className="block text-red-800 text-xs uppercase mb-2">Missing Evidence:</strong>
+                                                    <ul className="list-disc pl-5 text-sm text-red-700 space-y-1">
+                                                        {gapAnalysis.missing_items.map((item, i) => (
+                                                            <li key={i}>{item}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={handleGapAnalysis}
+                                                className="text-xs text-indigo-600 hover:text-indigo-800 font-bold underline mt-2 block text-center"
+                                            >
+                                                Re-run Analysis
                                             </button>
                                         </div>
                                     )}
-
-                                    {!loadingAi && (() => {
-                                        const reqs = getRequirements(selectedControl);
-                                        const stats = getEvidenceStats(selectedControl.control_id);
-
-                                        return (
-                                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                                                <table className="w-full text-left border-collapse">
-                                                    <thead>
-                                                        <tr className="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                            <th className="p-3 w-1/4">Requirement</th>
-                                                            <th className="p-3 w-1/4">Description</th>
-                                                            <th className="p-3 w-1/12">Source</th>
-                                                            <th className="p-3 w-1/12">Owner</th>
-                                                            <th className="p-3 w-1/12">Status</th>
-                                                            <th className="p-3 w-1/6">Last Update</th>
-                                                            <th className="p-3 w-1/12 text-center">Actions</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-gray-100">
-                                                        {reqs.map((req, idx) => {
-                                                            const isMet = isRequirementMet(idx, stats.uploaded);
-                                                            const isExpanded = expandedReq === idx;
-
-                                                            return (
-                                                                <React.Fragment key={idx}>
-                                                                    <tr
-                                                                        onClick={() => setExpandedReq(isExpanded ? null : idx)}
-                                                                        className={`cursor-pointer hover:bg-slate-50 transition-colors ${isExpanded ? 'bg-slate-50' : ''}`}
-                                                                    >
-                                                                        <td className="p-3 text-sm font-medium text-gray-900 border-l-4 border-transparent hover:border-purple-400">
-                                                                            <div className="flex items-center gap-2">
-                                                                                {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
-                                                                                {req.name}
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="p-3 text-xs text-gray-600 max-w-xs truncate" title={req.desc || req.name}>
-                                                                            {req.desc || "Standard verification matching control requirements."}
-                                                                        </td>
-                                                                        <td className="p-3 text-xs text-gray-500">
-                                                                            {selectedControl.category === "Technical" ?
-                                                                                <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Auto</span> :
-                                                                                "Manual"
-                                                                            }
-                                                                        </td>
-                                                                        <td className="p-3 text-xs text-gray-500">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px] font-bold">SY</div>
-                                                                                <span>System</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="p-3">
-                                                                            {isMet ? (
-                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                                                    PASSING
-                                                                                </span>
-                                                                            ) : (
-                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                                                    MISSING
-                                                                                </span>
-                                                                            )}
-                                                                        </td>
-                                                                        <td className="p-3 text-xs text-gray-400">
-                                                                            {new Date().toLocaleDateString()}
-                                                                        </td>
-                                                                        <td className="p-3 text-right flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                                            <input
-                                                                                type="file"
-                                                                                id={`file-upload-req-${idx}`}
-                                                                                className="hidden"
-                                                                                onChange={(e) => handleFileUpload(e, selectedControl.id)}
-                                                                            />
-                                                                            <button
-                                                                                onClick={() => document.getElementById(`file-upload-req-${idx}`).click()}
-                                                                                title="Upload Evidence"
-                                                                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                                            >
-                                                                                <Upload className="w-4 h-4" />
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => handleGenerateArtifact(req)}
-                                                                                title="Auto-Generate Draft"
-                                                                                className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded"
-                                                                            >
-                                                                                <Zap className="w-4 h-4" />
-                                                                            </button>
-                                                                        </td>
-                                                                    </tr>
-                                                                    {isExpanded && (
-                                                                        <tr className="bg-slate-50">
-                                                                            <td colSpan="6" className="p-4 pl-12">
-                                                                                <div className="space-y-4">
-                                                                                    <div className="grid grid-cols-2 gap-4">
-                                                                                        <div>
-                                                                                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Evidence Context</h4>
-                                                                                            <p className="text-sm text-gray-700 leading-relaxed">
-                                                                                                {req.desc || "This requirement verifies that the specific control implementation matches compliance standards. Ensure evidence is uploaded or automated checks are enabled."}
-                                                                                            </p>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Check Logic</h4>
-                                                                                            <code className="text-xs bg-gray-100 p-2 rounded block font-mono text-gray-600">
-                                                                                                MATCH(evidence.tags, ["{req.type}", "{selectedControl.control_id}"])
-                                                                                            </code>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    <div className="bg-white border rounded-lg p-3">
-                                                                                        <h4 className="text-xs font-bold text-gray-900 mb-2">History & Activity</h4>
-                                                                                        <div className="text-xs text-gray-500 italic">No recent activity detected for this requirement.</div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    )}
-                                                                </React.Fragment>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
-                            </div>
-
-                            {/* GAP ANALYSIS SECTION */}
-                            <div className="border border-indigo-100 bg-indigo-50 rounded-xl p-5 mt-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
-                                        <Activity className="w-5 h-5 text-indigo-600" /> Compliance Status Engine
-                                    </h3>
-                                    {gapAnalysis && (
-                                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${gapAnalysis.status === 'MET' ? 'bg-green-100 text-green-700' :
-                                            gapAnalysis.status === 'PARTIAL' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
-                                            }`}>
-                                            AI VERDICT: {gapAnalysis.status}
-                                        </span>
-                                    )}
                                 </div>
 
-                                {!gapAnalysis ? (
-                                    <div className="text-center py-6">
-                                        <p className="text-sm text-indigo-800 mb-3">Analyze uploaded evidence against requirements to determine automated status.</p>
-                                        <button
-                                            onClick={handleGapAnalysis}
-                                            disabled={analyzingGap}
-                                            className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg shadow-sm hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 mx-auto"
-                                        >
-                                            {analyzingGap ? <span className="animate-spin">⌛</span> : <Zap className="w-4 h-4" />}
-                                            {analyzingGap ? "Analyzing Compliance..." : "Run Gap Analysis"}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className="bg-white p-4 rounded-lg border border-indigo-100 text-sm text-gray-700">
-                                            <strong className="block text-gray-900 mb-1">Reasoning:</strong>
-                                            {gapAnalysis.reasoning}
-                                        </div>
-                                        {gapAnalysis.missing_items && gapAnalysis.missing_items.length > 0 && (
-                                            <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-                                                <strong className="block text-red-800 text-xs uppercase mb-2">Missing Evidence:</strong>
-                                                <ul className="list-disc pl-5 text-sm text-red-700 space-y-1">
-                                                    {gapAnalysis.missing_items.map((item, i) => (
-                                                        <li key={i}>{item}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                        <button
-                                            onClick={handleGapAnalysis}
-                                            className="text-xs text-indigo-600 hover:text-indigo-800 font-bold underline mt-2 block text-center"
-                                        >
-                                            Re-run Analysis
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* MISSING EVIDENCE ACTIONS */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                    <AlertCircle className="w-5 h-5 text-orange-500" /> Pending Actions
-                                </h3>
-                                <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
-                                    {selectedControl.category === "Technical" ? (
-                                        <div className="p-8 text-center bg-slate-50">
-                                            <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm mb-3">
-                                                <Zap className="w-6 h-6 text-purple-600" />
-                                            </div>
-                                            <h4 className="text-sm font-bold text-gray-900">Automated Check Enabled</h4>
-                                            <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">
-                                                This is a technical control. Evidence is automatically collected and verified by the system. Manual uploads are disabled.
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        (() => {
-                                            const reqs = getRequirements(selectedControl);
-                                            const stats = getEvidenceStats(selectedControl.control_id);
-                                            const missing = reqs.filter((_, idx) => !isRequirementMet(idx, stats.uploaded));
-
-                                            if (missing.length === 0) return <div className="p-4 text-sm text-gray-500 italic text-center">No pending actions. All requirements met.</div>;
-
-                                            return missing.map((req, i) => (
-                                                <div key={i} className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
-                                                            <Upload className="w-4 h-4" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-medium text-gray-900">Upload {req.name}</p>
-                                                            <p className="text-xs text-gray-500">Required for compliance.</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="file"
-                                                            id={`file-upload-${i}`}
-                                                            className="hidden"
-                                                            onChange={(e) => handleFileUpload(e, selectedControl.id)}
-                                                        />
-                                                        <button
-                                                            onClick={() => document.getElementById(`file-upload-${i}`).click()}
-                                                            className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50"
-                                                        >
-                                                            Upload
-                                                        </button>
-                                                        {/* Generate Option for Policies/Procedures */}
-                                                        {(req.type === 'Policy' || req.type === 'Procedure' || req.name.toLowerCase().includes('policy') || req.name.toLowerCase().includes('plan')) && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleGenerateArtifact(req);
-                                                                }}
-                                                                className="text-xs font-bold text-purple-600 border border-purple-200 px-3 py-1 rounded hover:bg-purple-50 flex items-center gap-1"
-                                                            >
-                                                                <Zap className="w-3 h-3" /> Draft
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ));
-                                        })()
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* UPLOADED EVIDENCE SECTION */}
-                            {evidenceList && evidenceList.length > 0 && (
-                                <div className="mt-8">
+                                {/* MISSING EVIDENCE ACTIONS */}
+                                <div>
                                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-blue-500" /> Uploaded Evidence
+                                        <AlertCircle className="w-5 h-5 text-orange-500" /> Pending Actions
                                     </h3>
                                     <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
-                                        {evidenceList.map((ev, i) => (
-                                            <div key={ev.id} className="p-4 flex justify-between items-start group hover:bg-gray-50">
-                                                <div className="flex gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mt-1">
-                                                        <FileText className="w-4 h-4" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900">{ev.filename}</p>
-                                                        <p className="text-xs text-gray-500">{new Date(ev.uploaded_at || Date.now()).toLocaleDateString()} • {ev.title}</p>
-                                                        {ev.validation_source !== 'manual' && (
-                                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-800 mt-1">
-                                                                Verified by AI
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                        {selectedControl.category === "Technical" ? (
+                                            <div className="p-8 text-center bg-slate-50">
+                                                <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm mb-3">
+                                                    <Zap className="w-6 h-6 text-purple-600" />
                                                 </div>
-                                                <button
-                                                    onClick={() => handleReviewDocument(ev)}
-                                                    className="text-xs bg-white border border-indigo-200 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-50 font-bold flex items-center gap-1 shadow-sm"
-                                                >
-                                                    <Zap className="w-3 h-3" /> Review
-                                                </button>
+                                                <h4 className="text-sm font-bold text-gray-900">Automated Check Enabled</h4>
+                                                <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">
+                                                    This is a technical control. Evidence is automatically collected and verified by the system. Manual uploads are disabled.
+                                                </p>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            (() => {
+                                                const reqs = getRequirements(selectedControl);
+                                                const stats = getEvidenceStats(selectedControl.control_id);
+                                                const missing = reqs.filter((_, idx) => !isRequirementMet(idx, stats.uploaded));
+
+                                                if (missing.length === 0) return <div className="p-4 text-sm text-gray-500 italic text-center">No pending actions. All requirements met.</div>;
+
+                                                return missing.map((req, i) => (
+                                                    <div key={i} className="p-4 flex justify-between items-center group hover:bg-gray-50 cursor-pointer">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                                                                <Upload className="w-4 h-4" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900">Upload {req.name}</p>
+                                                                <p className="text-xs text-gray-500">Required for compliance.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="file"
+                                                                id={`file-upload-${i}`}
+                                                                className="hidden"
+                                                                onChange={(e) => handleFileUpload(e, selectedControl.id)}
+                                                            />
+                                                            <button
+                                                                onClick={() => document.getElementById(`file-upload-${i}`).click()}
+                                                                className="text-xs font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded hover:bg-blue-50"
+                                                            >
+                                                                Upload
+                                                            </button>
+                                                            {/* Generate Option for Policies/Procedures */}
+                                                            {(req.type === 'Policy' || req.type === 'Procedure' || req.name.toLowerCase().includes('policy') || req.name.toLowerCase().includes('plan')) && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleGenerateArtifact(req);
+                                                                    }}
+                                                                    className="text-xs font-bold text-purple-600 border border-purple-200 px-3 py-1 rounded hover:bg-purple-50 flex items-center gap-1"
+                                                                >
+                                                                    <Zap className="w-3 h-3" /> Draft
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ));
+                                            })()
+                                        )}
                                     </div>
                                 </div>
-                            )}
 
-                        </div>
+                                {/* UPLOADED EVIDENCE SECTION */}
+                                {evidenceList && evidenceList.length > 0 && (
+                                    <div className="mt-8">
+                                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                            <FileText className="w-5 h-5 text-blue-500" /> Uploaded Evidence
+                                        </h3>
+                                        <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
+                                            {evidenceList.map((ev, i) => (
+                                                <div key={ev.id} className="p-4 flex justify-between items-start group hover:bg-gray-50">
+                                                    <div className="flex gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mt-1">
+                                                            <FileText className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-900">{ev.filename}</p>
+                                                            <p className="text-xs text-gray-500">{new Date(ev.uploaded_at || Date.now()).toLocaleDateString()} • {ev.title}</p>
+                                                            {ev.validation_source !== 'manual' && (
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-800 mt-1">
+                                                                    Verified by AI
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleReviewDocument(ev)}
+                                                        className="text-xs bg-white border border-indigo-200 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-50 font-bold flex items-center gap-1 shadow-sm"
+                                                    >
+                                                        <Zap className="w-3 h-3" /> Review
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                        <div className="p-6 border-t border-gray-200 bg-gray-50">
-                            <div className="text-xs text-center text-gray-500 italic">
-                                {selectedControl.classification === "AUTO" ?
-                                    "Control status is managed by automated compliance checks." :
-                                    "Control status is automatically updated based on evidence uploads."}
+                            </div>
+
+                            <div className="p-6 border-t border-gray-200 bg-gray-50">
+                                <div className="text-xs text-center text-gray-500 italic">
+                                    {selectedControl.classification === "AUTO" ?
+                                        "Control status is managed by automated compliance checks." :
+                                        "Control status is automatically updated based on evidence uploads."}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

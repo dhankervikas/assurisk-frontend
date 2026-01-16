@@ -196,7 +196,7 @@ const FrameworkDetail_HIPAA = () => {
                             <Shield className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                             <p className="text-gray-500 font-medium">No safeguards found matching your filters.</p>
                             {/* DIAGNOSTIC MESSAGE IF ZERO RESULTS */}
-                            {controls.length === 0 && (
+                            {controls.length === 0 && id === '1' && (
                                 <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 text-xs text-left font-mono rounded overflow-auto max-w-lg mx-auto">
                                     <strong>DIAGNOSTIC INFO:</strong><br />
                                     Target Framework ID: {id}<br />

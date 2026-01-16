@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { auditService } from '../../services/auditService';
-import { Shield, LayoutGrid, List, Layers, AlertTriangle, CheckCircle, Clock, ArrowRight, FileText, Lock, X, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Shield, Layers, AlertTriangle, CheckCircle, Clock, ArrowRight, FileText, Lock, X, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 const mockBanner = (
     <div className="bg-amber-100 border-b border-amber-300 text-amber-900 px-6 py-2 flex items-center justify-center gap-2 text-sm font-bold shadow-inner">
