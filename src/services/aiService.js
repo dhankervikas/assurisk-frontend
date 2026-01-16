@@ -1,4 +1,8 @@
 import axios from 'axios';
+import config from '../config';
+
+const API_URL = config.API_BASE_URL + '/ai'; // Correctly append /ai path
+
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 

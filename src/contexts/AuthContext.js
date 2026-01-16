@@ -6,7 +6,9 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 // Use environment variable for API URL, fallback to localhost for dev
-const API_BASE_URL = 'http://localhost:8000'; // Hardcoded for Localhost
+import config from '../config';
+
+const API_BASE_URL = config.API_BASE_URL.replace('/api/v1', ''); // AuthContext uses base URL without /api/v1 sometimes? Let's check usage.
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

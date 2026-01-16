@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { ISO_CONTROLS, SOC2_CONTROLS, HIPPA_CONTROLS, NIST_CONTROLS, GDPR_CONTROLS } from '../data/seedData';
 
-const API_URL = 'http://localhost:8000/api/v1';
+import config from '../config';
+const API_URL = config.API_BASE_URL;
 
 const Dashboard = () => {
     const navigate = useNavigate();

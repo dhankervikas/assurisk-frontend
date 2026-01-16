@@ -13,7 +13,9 @@ import { AIService } from '../services/aiService';
 
 // For local development, use localhost. For prod, use Render.
 // Ideally usage: const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
-const API_URL = 'http://localhost:8000/api/v1';
+import config from '../config';
+
+const API_URL = config.API_BASE_URL;
 
 // COSO DESCRIPTIONS MAP
 const COSO_DESCRIPTIONS = {
@@ -352,7 +354,7 @@ const FrameworkDetail = () => {
     const fetchEvidence = async (controlId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_URL} /evidence/control / ${controlId} `, { headers: { Authorization: `Bearer ${token} ` } });
+            const res = await axios.get(`${API_URL}/evidence/control/${controlId}`, { headers: { Authorization: `Bearer ${token}` } });
             setEvidenceList(res.data);
         } catch (e) {
             console.error("Failed to load evidence", e);
@@ -383,9 +385,9 @@ const FrameworkDetail = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${API_URL} /evidence/upload`, formData, {
+            await axios.post(`${API_URL}/evidence/upload`, formData, {
                 headers: {
-                    'Authorization': `Bearer ${token} `,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
                 }
             });
@@ -402,15 +404,15 @@ const FrameworkDetail = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const headers = { Authorization: `Bearer ${token} ` };
+            const headers = { Authorization: `Bearer ${token}` };
 
-            const fwRes = await axios.get(`${API_URL} /frameworks/${id} `, { headers });
+            const fwRes = await axios.get(`${API_URL}/frameworks/${id}`, { headers });
             const fwData = fwRes.data;
             const isSOC2 = fwData.code && fwData.code.includes("SOC2");
             const isISO = fwData.code && fwData.code.includes("ISO27001");
             const useGroupedView = isSOC2 || isISO;
 
-            const ctrlRes = await axios.get(`${API_URL} /controls/ ? limit = 10000`, { headers });
+            const ctrlRes = await axios.get(`${API_URL}/controls/?limit=10000`, { headers });
             const allControls = ctrlRes.data.filter(c => c.framework_id === parseInt(id));
 
             if (useGroupedView) {
@@ -431,7 +433,7 @@ const FrameworkDetail = () => {
                 setSocControls(grouped);
                 setProcesses([]);
             } else {
-                const procRes = await axios.get(`${API_URL} /processes/`, { headers });
+                const procRes = await axios.get(`${API_URL}/processes/`, { headers });
                 const filteredProcesses = procRes.data.map(proc => {
                     const relevantSubs = proc.sub_processes.map(sub => {
                         return { ...sub, controls: sub.controls || [] };
@@ -623,7 +625,7 @@ const FrameworkDetail = () => {
                                 onClick={async () => {
                                     if (window.confirm("RESET Data? This destroys progress.")) {
                                         try {
-                                            await fetch(`${API_URL} /frameworks/${framework.id}/seed-controls`, { method: 'POST' });
+                                            await fetch(`${API_URL}/frameworks/${framework.id}/seed-controls`, { method: 'POST' });
                                             window.location.reload();
                                         } catch (e) { alert(e); }
                                     }

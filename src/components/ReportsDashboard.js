@@ -7,7 +7,8 @@ import {
 } from 'recharts';
 import { Download, CheckCircle, AlertTriangle, FileText, Shield } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000/api/v1';
+import config from '../config';
+const API_URL = config.API_BASE_URL;
 
 const ReportHeader = ({ confidence, framework }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8 flex justify-between items-center">
