@@ -75,7 +75,7 @@ export const AIService = {
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'http://localhost:8000/api/v1/ai/suggest-evidence',
+                `${API_URL}/suggest-evidence`,
                 {
                     title: controlTitle,
                     description: description,
@@ -101,7 +101,7 @@ export const AIService = {
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'http://localhost:8000/api/v1/ai/gap-analysis',
+                `${API_URL}/gap-analysis`,
                 {
                     control_title: controlTitle,
                     requirements: requirements,
@@ -126,7 +126,7 @@ export const AIService = {
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'http://localhost:8000/api/v1/ai/generate-artifact',
+                `${API_URL}/generate-artifact`,
                 {
                     control_title: controlTitle,
                     artifact_name: artifactName,
@@ -151,7 +151,7 @@ export const AIService = {
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             const response = await axios.post(
-                'http://localhost:8000/api/v1/ai/review-document',
+                `${API_URL}/review-document`,
                 {
                     control_id: controlId,
                     evidence_id: evidenceId
