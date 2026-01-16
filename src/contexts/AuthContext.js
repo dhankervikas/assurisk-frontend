@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 // Use environment variable for API URL, fallback to localhost for dev
-import config from '../config';
 
 const API_BASE_URL = config.API_BASE_URL.replace('/api/v1', ''); // AuthContext uses base URL without /api/v1 sometimes? Let's check usage.
 

@@ -31,6 +31,7 @@ const FrameworkDetail_HIPAA = () => {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchData = async () => {
@@ -57,6 +58,7 @@ const FrameworkDetail_HIPAA = () => {
             console.log("Available Framework IDs in Controls:", uniqueFwIds);
 
             // Robust Filter: Handle string/int mismatch just in case
+            // eslint-disable-next-line eqeqeq
             const fwControls = allControls.filter(c => c.framework_id == targetId);
 
             console.log(`Debug: Client-Side Filter. TargetID: ${targetId}. Found: ${fwControls.length} out of ${allControls.length}`);

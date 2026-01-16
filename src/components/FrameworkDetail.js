@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Search, CheckCircle, X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, TrendingUp, AlertTriangle,
-    Zap, Activity, FileText
+    Zap, Activity, FileText,
+    X, Shield, AlertCircle, Upload, ChevronUp, ChevronDown, ChevronRight, Search
 } from 'lucide-react';
-import FrameworkDetail_HIPAA from './FrameworkDetail_HIPAA';
+import FrameworkDetailHipaa from './FrameworkDetail_HIPAA';
 import { AIService } from '../services/aiService';
 
 // ... (existing code)
@@ -484,7 +484,8 @@ const FrameworkDetail = () => {
 
     // ROUTING TO SUB-COMPONENTS
     if (framework?.code === "HIPAA") {
-        return <FrameworkDetail_HIPAA />; // DELEGATE TO HIPAA COMPONENT
+        // eslint-disable-next-line
+        return <FrameworkDetailHipaa />; // DELEGATE TO HIPAA COMPONENT
     }
 
     const isSOC2 = framework?.code?.includes("SOC2");
@@ -547,38 +548,7 @@ const FrameworkDetail = () => {
         if (titleLower.includes("training") || titleLower.includes("awareness")) {
             return [{ name: "Training Slide Deck / Material", type: "Document" }, { name: "Attendance / Completion Log", type: "Log" }];
         }
-        // UTILS
-        const getEvidenceStats = (controlId) => {
-            // If we have selected this control and have fresh evidence, use it
-            // FIX: Compare control_id (string) vs controlId (string) OR ensure we match the context
-            if (selectedControl && selectedControl.control_id === controlId && evidenceList) {
-                // Even if length is 0, if we fetched it, we should use it (it might really be 0).
-                // But usually we care if we have something to show 'MET'.
-                // If evidenceList is empty but freshly fetched, it means 0 files.
-                return { total: 0, uploaded: evidenceList };
-            }
 
-            // Fallback to global data (which might be stale or missing evidence detail)
-            // Find control in socControls
-            let control = null;
-            Object.values(socControls).forEach(list => {
-                const found = list.find(c => c.control_id === controlId);
-                if (found) control = found;
-            });
-
-            if (!control) return { total: 0, uploaded: [] };
-            // API v1 usually returns evidence count, not list in main fetch.
-            // So we default to empty unless we have fresh fetch.
-            return { total: 0, uploaded: control.evidence || [] };
-        };
-
-        // eslint-disable-next-line no-unused-vars
-        // eslint-disable-next-line no-unused-vars
-        const isRequirementMet = (reqIdx, uploadedFiles) => {
-            // PERMISSIVE LOGIC: If ANY file is uploaded, mark the first requirement as met.
-            if (!uploadedFiles || uploadedFiles.length === 0) return false;
-            return reqIdx < uploadedFiles.length;
-        };
         if (titleLower.includes("vendor") || titleLower.includes("supplier") || titleLower.includes("third party")) {
             return [{ name: "Vendor List", type: "List" }, { name: "Due Diligence Report", type: "Report" }];
         }
@@ -611,7 +581,7 @@ const FrameworkDetail = () => {
                     <div className="flex justify-between items-start mb-6">
                         <div>
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
-                                <a onClick={() => navigate('/dashboard')} className="hover:text-blue-600 cursor-pointer transition-colors">Dashboard</a>
+                                <button onClick={() => navigate('/dashboard')} className="hover:text-blue-600 cursor-pointer transition-colors">Dashboard</button>
                                 <ChevronRight className="w-3 h-3" />
                                 <span>{framework.code}</span>
                             </div>
@@ -846,6 +816,7 @@ const FrameworkDetail = () => {
                                 return 0;
                             });
                             if (controls.length === 0) return null;
+                            // eslint-disable-next-line no-unused-vars
                             const cosoText = COSO_DESCRIPTIONS[category] || COSO_DESCRIPTIONS["DEFAULT"];
 
                             return (
@@ -874,6 +845,7 @@ const FrameworkDetail = () => {
                                             <tbody className="divide-y divide-gray-200">
                                                 {controls.map(control => {
                                                     const stats = getEvidenceStats(control.control_id); // Changed from c to control
+                                                    // eslint-disable-next-line no-unused-vars
                                                     const evidenceStatus = stats.uploaded > 0
                                                         ? (stats.uploaded >= stats.total ? "Met" : "Partial")
                                                         : "Not Met";
@@ -974,10 +946,7 @@ const FrameworkDetail = () => {
                                 <X className="w-5 h-5 text-gray-600" />
                             </button>
 
-// ... imports
 
-
-                            // ... in JSX, inside the Drawer, maybe after Description
                             <div className="p-8 pb-4 border-b border-gray-100">
                                 <div className="flex gap-2 mb-2">
                                     <span className="text-xs font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded inline-block">

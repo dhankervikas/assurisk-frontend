@@ -28,8 +28,7 @@ const Dashboard = () => {
 
     const [seedLog, setSeedLog] = useState([]); // Log state
 
-    // Helper to add logs to state
-    const addLog = (msg) => setSeedLog(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
+
 
     useEffect(() => {
         fetchData();
